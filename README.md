@@ -1,8 +1,8 @@
 # 🏛️ The Mythology Codex - Project Documentation
 
-> **Status:** ✅ **Phases 0-2E Complete** | **Oceanborn Legends Test Data: 87 Entities**  
-> **Last Updated:** December 25, 2025  
-> **Current State:** Crossover Events with cross-mythology battles, alliances, and collaborative stories complete
+> **Status:** ✅ **Phases 0-2F Complete** | **Oceanborn Legends Test Data: 87 Entities**  
+> **Last Updated:** December 26, 2025  
+> **Current State:** Mythology Creation Wizard with AI assistance, multi-select geography, and cultural styles (including Alaska Native)
 
 ---
 
@@ -21,6 +21,7 @@
 ### Feature Documentation
 | Document | Purpose | Lines |
 |----------|---------|-------|
+| **[AI_ASSISTANCE_FEATURE.md](AI_ASSISTANCE_FEATURE.md)** | 🆕 AI assistance system & Mythology Wizard (Phase 4) | ~1800 |
 | **[BESTIARY_FEATURE.md](BESTIARY_FEATURE.md)** | Creature system design (Phase 1C) | ~500 |
 | **[MAP_ASSETS_STRATEGY.md](MAP_ASSETS_STRATEGY.md)** | Map asset creation approach | ~300 |
 | **[MAP_TYPE_DIFFERENTIATION.md](MAP_TYPE_DIFFERENTIATION.md)** | 5 map types with type-specific features | ~400 |
@@ -112,6 +113,7 @@ After logging in:
 | **Phase 2C** | Relationships (Cytoscape.js) | ✅ COMPLETE | 100% |
 | **Phase 2D** | AI Battles | ✅ COMPLETE | 100% |
 | **Phase 2E** | Crossovers | ✅ COMPLETE | 100% |
+| **Phase 2F** | Mythology Creation Wizard | ✅ COMPLETE | 100% |
 | **Phase 3** | Gamification | ⏸️ PENDING | 0% |
 | **Phase 4** | Collaboration | ⏸️ PENDING | 0% |
 | **Phase 5** | AI Enhancements | ⏸️ PENDING | 0% |
@@ -288,6 +290,41 @@ After logging in:
   - Mythology olympics, crossover festival
   - Custom event creation
   - Participant tracking with placements
+
+**Mythology Creation Wizard (Phase 2F):**
+- **Guided 5-Step Creation Process:**
+  - Step 1: Choose mythology category and cultural style
+  - Step 2: Define geography (environment, climate, landmarks)
+  - Step 3: Apply Five Themes of Geography
+  - Step 4: Name your mythology with AI suggestions
+  - Step 5: Preview and create
+- **6 Mythology Categories with 20+ Cultural Styles:**
+  - 🏛️ Classic Mythology (Greek/Roman, Norse, Egyptian, Celtic, Asian, African, Indigenous Americas, **Alaska Native**, Mesopotamian, Polynesian)
+  - 📜 Historical Mythology (Hindu, Japanese Shinto, Chinese, Slavic)
+  - 🚀 Future Mythology (Cyberpunk, Post-Apocalyptic, Space Opera)
+  - 🏙️ Modern Mythology (Urban Fantasy)
+  - 🌀 Abstract Mythology (Elemental, Cosmic Horror, Dream Realm)
+  - ✨ Custom (Build your own)
+- **Alaska Native Cultural Support:**
+  - Detailed cultural context for Ahtna, Yup'ik, Tlingit, Inupiaq peoples
+  - Authentic naming guidance (ravens, salmon, glaciers, northern lights)
+  - Designed for 65% Alaska Native student population (Copper River region)
+- **Multi-Select Geography Builder:**
+  - 12 environment options with kid-friendly descriptions
+  - 10 climate options (including "Frozen Tundra" and "Eternal Night")
+  - 12 landmark options (Sacred Temple, World Tree, Crystal Cave, etc.)
+  - Students can select MULTIPLE options for each category
+  - AI assistance on each sub-step with contextual prompts
+- **Five Themes Integration:**
+  - Location, Place, Human-Environment Interaction, Movement, Regions
+  - Real-world examples and mythology examples for each theme
+  - 8 quick-starter ideas per theme (clickable chips)
+  - "Stuck? Get a Hint!" feature with rotating prompts
+- **Context-Aware AI Name Suggestions:**
+  - AI considers chosen cultural style when suggesting names
+  - Includes all geography choices in the prompt
+  - Provides authentic naming patterns for each culture
+  - Explains meaning and connection for each suggestion
 
 #### ✅ **Gallery & Discovery**
 - Public mythology gallery
