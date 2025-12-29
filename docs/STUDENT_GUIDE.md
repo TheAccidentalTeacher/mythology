@@ -231,17 +231,76 @@ Compete (friendly!) with classmates:
 
 ## 🎨 COOL FEATURES TO TRY
 
-### **1. AI Image Generation**
+### **1. AI Image Generation** 🆕
 
-- Create character → Click **"Generate Image"**
-- AI creates art based on your description!
-- Try different styles: Greek Marble, Norse Woodcut, Cyberpunk Neon, Anime
+Generate amazing AI artwork for your mythology!
 
-**Limit:** 10 images per day (use wisely!)
+**How to Earn Image Tokens:**
+- Take a **Math Quiz** (answer 3 questions = 1 token)
+- Build **streaks** for bonus tokens:
+  - 5+ correct in a row = 🔥 2× tokens!
+  - 10+ correct = 🔥🔥 3× tokens!
+  - 15+ correct = 🔥🔥🔥 4× tokens!
+
+**What You Can Generate:**
+- **Character Portraits** - AI creates your god/hero based on your description
+- **Creature Illustrations** - Bring your monsters to life
+- **Realm Landscapes** - Visualize your mythology's locations
+- **Story Scenes** - Illustrate key moments in your stories
+
+**Image Styles:** Greek Marble, Norse Woodcut, Cyberpunk Neon, Anime, Watercolor, and more!
 
 ---
 
-### **2. World Maps**
+### **2. Trading Cards & Collectibles** 🆕
+
+Collect trading cards of your characters and creatures!
+
+**How It Works:**
+- Click **"Generate Trading Card"** on any character or creature
+- Cards have **5 rarity levels:**
+  - ⬜ **Common** (45% chance) - Gray border
+  - 🟢 **Uncommon** (25% chance) - Green border
+  - 🔵 **Rare** (18% chance) - Blue border  
+  - 🟣 **Epic** (9% chance) - Purple border + holographic!
+  - 🟡 **Legendary** (3% chance) - Gold border + holographic!
+- View your collection in the **Collection Gallery**
+- Filter and sort by rarity, type, name, or date
+
+**Stat Cards:**
+- Auto-calculated combat stats (HP, ATK, DEF, SPD)
+- Based on character type or creature danger level
+- Perfect for comparing your creations!
+
+---
+
+### **3. Creative Exports** 🆕
+
+Create awesome shareable content!
+
+**Comic Strip Generator:**
+- Turn your stories into **3-panel comics**
+- AI generates sequential art panels
+- Great for illustrating epic moments!
+
+**Prophecy Scroll:**
+- Ancient scroll-style imagery
+- Perfect for origin stories and prophecies
+- Mystical aged parchment aesthetic
+
+**Realm Postcards:**
+- "Greetings from [Your Realm]!" tourism-style postcards
+- Show off your mythology's locations
+- Available on character, creature, and realm pages
+
+**Wanted Posters:**
+- Classic "WANTED" poster for villains
+- Shows danger level, crimes, and reward
+- Perfect for the bad guys in your mythology!
+
+---
+
+### **4. World Maps**
 
 - Click **"Create Map"**
 - Draw your mythology's world!
@@ -250,7 +309,16 @@ Compete (friendly!) with classmates:
 
 ---
 
-### **3. Relationship Mapping**
+### **4. World Maps**
+
+- Click **"Create Map"**
+- Draw your mythology's world!
+- Tools: Draw, erase, add icons, label locations
+- Place your locations on the map
+
+---
+
+### **5. Relationship Mapping**
 
 - Show how characters are connected
 - Examples:
@@ -262,7 +330,7 @@ Creates a cool visual graph!
 
 ---
 
-### **4. AI Battles (CROSSOVERS!)**
+### **6. AI Battles (CROSSOVERS!)**
 
 - Challenge a classmate's character
 - "Zeus vs. Thor" or "Your dragon vs. their monster"
@@ -271,7 +339,7 @@ Creates a cool visual graph!
 
 ---
 
-### **5. Presentations**
+### **7. Presentations**
 
 When you're done:
 - Click **"Create Presentation"**
@@ -364,9 +432,19 @@ When you're done:
 - Check [Content Guidelines](./CONTENT_POLICY.md)
 
 **"AI generation isn't working"**
-- Check daily limit (10 per day)
-- Try simpler prompt
+- Check your **image tokens** (earn more through math quizzes!)
+- Try a simpler description
+- Make sure your description follows content guidelines
 - Ask teacher for help
+
+**"How do I get more image tokens?"**
+- Take the math quiz (click the 🎨 button then "Earn Tokens")
+- Answer 3 questions correctly = 1 token
+- Build streaks for bonus tokens!
+
+**"I can't find my trading cards"**
+- Go to your mythology → Click "Collection Gallery"
+- Filter by rarity or sort by date to find recent cards
 
 **"I accidentally deleted my character"**
 - Ask your teacher (they can restore it)

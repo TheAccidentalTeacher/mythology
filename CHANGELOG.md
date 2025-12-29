@@ -1,5 +1,224 @@
 # Mythology Project - Changelog
 
+## December 29, 2025
+
+### 🎴 Phase 4B-D Complete - Battle Images, Collectibles, Creative Exports
+
+#### Phase 4B: Battle Integration
+
+**Battle Scene Generation**
+- ✅ Generate epic battle scenes during combat
+- ✅ Victory celebration cards
+- ✅ Defeat images with dramatic flair
+- ✅ Images integrated into animated battle playback
+
+#### Phase 4C: Trading Cards & Collectibles
+
+**Trading Card Generator**
+- ✅ 5 rarity tiers with probability weighting:
+  - Common: 45% (gray border)
+  - Uncommon: 25% (green border)
+  - Rare: 18% (blue border)
+  - Epic: 9% (purple border, holographic)
+  - Legendary: 3% (gold border, holographic)
+- ✅ Fixed rarity rolling system (explicit array order instead of Object.entries)
+- ✅ Cheat mode now only bypasses tokens, still rolls random rarity
+- ✅ Works for characters and creatures
+- ✅ Holographic shimmer effects for Epic/Legendary cards
+
+**Character Stat Cards**
+- ✅ Auto-calculated stats based on character type
+- ✅ Combat stats with visual bars (HP, ATK, DEF, SPD)
+- ✅ Domain and power listings
+- ✅ Professional stat card layout
+
+**Collection Gallery**
+- ✅ View all collected trading cards
+- ✅ Filter by rarity, entity type
+- ✅ Sort by name, rarity, date collected
+- ✅ Card count statistics
+
+#### Phase 4D: Creative Exports
+
+**Comic Strip Generator**
+- ✅ Generate 3-panel comic strips from stories
+- ✅ Sequential narrative panels
+- ✅ Story-aware scene generation
+- ✅ Integrated on story detail pages
+
+**Prophecy Scroll Generator**
+- ✅ Ancient scroll-style imagery
+- ✅ Mystical text and prophecy visualization
+- ✅ Aged parchment aesthetic
+- ✅ Integrated on story detail pages
+
+**Realm Postcard Generator**
+- ✅ "Greetings from [Realm]" tourism-style postcards
+- ✅ Location-based imagery with landmarks
+- ✅ Integrated in 3 locations:
+  - Realm detail pages (new route!)
+  - Character pages (domain postcards)
+  - Creature pages (habitat postcards)
+
+**Wanted Poster Generator**
+- ✅ Classic "WANTED" poster design
+- ✅ CSS text overlay approach (AI generates portrait only)
+- ✅ WANTED header, name, danger level
+- ✅ Crimes list and reward display
+- ✅ Perfect for villains and dangerous creatures
+
+#### New Pages & Routes
+
+**Realm Detail Page** (NEW)
+- ✅ New route: `/student/mythology/[id]/realm/[realmId]`
+- ✅ Full realm information display
+- ✅ ImageGenPanel for realm image generation
+- ✅ ImageGallery for realm images
+- ✅ RealmPostcardGenerator
+- ✅ Geography, inhabitants, dangers sections
+- ✅ Realms now clickable from mythology overview
+
+#### Bug Fixes
+
+**Trading Card Rarity**
+- Fixed: Users getting legendary 10/10 times
+- Root cause 1: `Object.entries()` iteration order not guaranteed
+- Root cause 2: Cheat mode defaulted to legendary
+- Solution: Explicit array order + cheat mode only bypasses tokens
+
+**Wanted Poster Text**
+- Fixed: AI-generated posters had blank text areas
+- Root cause: AI image generators are bad at rendering text
+- Solution: Generate portrait only, overlay text with CSS
+
+**Modal Z-Index**
+- Fixed: ImageGenModal hidden behind other UI elements
+- Solution: Bumped ImageGenModal to z-[9999], MathQuizModal to z-[10000]
+
+**Creature Page Layout**
+- Fixed: Creature page used ImageGenButton (modal) instead of ImageGenPanel (inline)
+- Solution: Changed to match character page layout
+
+#### Files Created
+- `app/src/app/student/mythology/[id]/realm/[realmId]/page.tsx` - Realm detail page
+
+#### Files Modified
+- `TradingCardGenerator.tsx` - Fixed rarity rolling, removed cheat rarity selector
+- `WantedPosterGenerator.tsx` - CSS poster template with text overlay
+- `ImageGenModal.tsx` - z-index bump to z-[9999]
+- `MathQuizModal.tsx` - z-index bump to z-[10000]
+- `creature/[creatureId]/page.tsx` - Changed to ImageGenPanel, added RealmPostcardGenerator
+- `character/[characterId]/page.tsx` - Added RealmPostcardGenerator
+- `mythology/[id]/page.tsx` - Made realms clickable links
+- `/api/images/generate/route.ts` - Debug logging, fallback secret
+
+---
+
+## December 27, 2025
+
+### 🎨 Phase 4A Complete - AI Image Generation System
+
+#### Major Features Implemented
+
+**Math Quiz Token System**
+- ✅ 20+ math problem types across 6 categories
+- ✅ Arithmetic: Single/double digit addition, subtraction, multiplication, division
+- ✅ Fractions: Simple fractions, adding fractions, decimals, percentages
+- ✅ Algebra: Simple equations, linear equations, order of operations
+- ✅ Geometry: Perimeter, area, angles, coordinate plane (with SVG diagrams!)
+- ✅ Word Problems: Addition/subtraction, multiplication scenarios
+- ✅ Streak tracking with bonus multipliers (2×, 3×, 4× tokens)
+- ✅ Confetti celebration on correct answers
+- ✅ MathQuizModal component with full UI
+- ✅ Dev mode math type selector (via cheat code)
+
+**Dual Image Generation Providers**
+- ✅ Nano Banana (Gemini 2.5 Flash Image) as primary - $0.039/image
+- ✅ DALL-E 3 as automatic fallback - $0.04-$0.12/image
+- ✅ Provider badge showing which AI generated (🍌 or 🎨)
+- ✅ nanobanana.ts client with full error handling
+
+**Triple-Layer Safety System**
+- ✅ Blocklist filter (explicit terms hard-blocked)
+- ✅ Pattern detection (AI scans for concerning content)
+- ✅ System prompt wrapper (enforces age-appropriate output)
+- ✅ "No text in images" enforcement
+- ✅ safetyFilter.ts with comprehensive checks
+
+**Entity-Specific Prompt Builders**
+- ✅ Character portraits with personality/domain styling
+- ✅ Creature illustrations with danger level effects
+- ✅ Realm landscapes with geography details
+- ✅ Story scene illustrations
+- ✅ Mythology overview images
+- ✅ Trading card templates (prepared for Phase 4C)
+- ✅ Prophecy scroll templates (prepared for Phase 4D)
+
+**Access Control System**
+- ✅ Token-gated for students (earn through math quiz)
+- ✅ Unlimited access for teachers/admins (👑 badge)
+- ✅ Hidden dev cheat code (click 🎨 5× quickly → 🔧 Dev Mode)
+- ✅ Teacher-configurable questions-per-token
+- ✅ Blocked math topic settings per classroom
+
+**UI Components**
+- ✅ ImageGenPanel - Side panel on character pages (70/30 layout)
+- ✅ Save/Discard preview before finalizing image
+- ✅ ImageGallery component for viewing generated images
+- ✅ TeacherImageModeration dashboard
+- ✅ TeacherImageSettings configuration page
+- ✅ ImageGenButton reusable component
+
+**API Endpoints**
+- ✅ `/api/quiz/generate` - Generate quiz problems (GET available types, POST new problem)
+- ✅ `/api/quiz/check` - Check answers, award tokens
+- ✅ `/api/images/generate` - Generate images (POST) + get stats (GET)
+- ✅ `/api/images/gallery` - User's image gallery
+- ✅ `/api/images/moderate` - Teacher moderation actions
+- ✅ `/api/classroom/image-settings` - Teacher settings management
+- ✅ `/api/images/[imageId]` - Image CRUD operations
+- ✅ `/api/images/[imageId]/confirm` - Save/confirm generated images
+
+**Database Migration (011_image_generation.sql)**
+- ✅ `quiz_attempts` table - Math quiz history
+- ✅ `generated_images` table - AI images with metadata
+- ✅ `classroom_image_settings` table - Teacher controls
+- ✅ `moderation_log` table - Moderation tracking
+- ✅ Profile columns: `image_tokens`, `quiz_streak`
+- ✅ RLS policies for all tables
+
+#### Bug Fixes
+- Fixed Gemini model name (`gemini-2.5-flash-image` not preview version)
+- Fixed Math Quiz answer checking (string vs number comparison)
+- Fixed empty POST body handling in quiz generate API
+- Fixed coordinate plane SVG diagrams not displaying
+- Added remote patterns for DALL-E and Supabase storage in next.config.ts
+
+#### Files Created
+- `app/src/lib/mathQuiz/` - Math quiz module (types.ts, mathTypes.ts, quizEngine.ts, index.ts)
+- `app/src/lib/imageGen/` - Image generation module (types.ts, safetyFilter.ts, promptBuilder.ts, nanobanana.ts)
+- `app/src/components/MathQuizModal.tsx` - Quiz UI with confetti
+- `app/src/components/ImageGenPanel.tsx` - Side panel for image generation
+- `app/src/components/ImageGenModal.tsx` - Modal version (legacy)
+- `app/src/components/ImageGenButton.tsx` - Reusable button
+- `app/src/components/ImageGallery.tsx` - Gallery display
+- `app/src/components/TeacherImageModeration.tsx` - Moderation UI
+- `app/src/components/TeacherImageSettings.tsx` - Settings UI
+- `app/src/app/api/quiz/generate/route.ts` - Quiz API
+- `app/src/app/api/quiz/check/route.ts` - Answer checking API
+- `app/src/app/api/images/generate/route.ts` - Image generation API
+- `app/src/app/api/images/gallery/route.ts` - Gallery API
+- `app/src/app/api/images/[imageId]/route.ts` - Image CRUD
+- `app/src/app/api/images/[imageId]/confirm/route.ts` - Image confirmation
+- `supabase/migrations/011_image_generation.sql` - Database schema
+
+#### Files Modified
+- `app/src/app/student/mythology/[id]/character/[characterId]/page.tsx` - Added ImageGenPanel
+- `next.config.ts` - Added DALL-E and Supabase image hostnames
+- `.env.local` - Added GEMINI_API_KEY, DEV_CHEAT_SECRET
+
+---
+
 ## December 24, 2025
 
 ### 🎉 Phase 2C Complete - Relationships & Realms

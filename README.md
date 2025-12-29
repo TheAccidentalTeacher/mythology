@@ -1,8 +1,8 @@
 # 🏛️ The Mythology Codex - Project Documentation
 
-> **Status:** ✅ **Phases 0-2F Complete** | **Oceanborn Legends Test Data: 87 Entities**  
-> **Last Updated:** December 26, 2025  
-> **Current State:** Mythology Creation Wizard with AI assistance, multi-select geography, and cultural styles (including Alaska Native)
+> **Status:** ✅ **Phases 0-3 Complete + Phase 4A-D (Image Generation + Collectibles + Creative Exports)** | **Oceanborn Legends Test Data: 87 Entities**  
+> **Last Updated:** December 29, 2025  
+> **Current State:** AI Image Generation with Trading Cards, Wanted Posters, Comic Strips, Prophecy Scrolls, Realm Postcards
 
 ---
 
@@ -21,7 +21,8 @@
 ### Feature Documentation
 | Document | Purpose | Lines |
 |----------|---------|-------|
-| **[AI_ASSISTANCE_FEATURE.md](AI_ASSISTANCE_FEATURE.md)** | 🆕 AI assistance system & Mythology Wizard (Phase 4) | ~1800 |
+| **[AI_ASSISTANCE_FEATURE.md](AI_ASSISTANCE_FEATURE.md)** | AI assistance system & Mythology Wizard (Phase 2F) | ~1800 |
+| **[IMAGE_GENERATION_PLAN.md](IMAGE_GENERATION_PLAN.md)** | 🆕 AI Image Generation system (Phase 4A) - Math Quiz, Tokens, Safety | ~975 |
 | **[BESTIARY_FEATURE.md](BESTIARY_FEATURE.md)** | Creature system design (Phase 1C) | ~500 |
 | **[MAP_ASSETS_STRATEGY.md](MAP_ASSETS_STRATEGY.md)** | Map asset creation approach | ~300 |
 | **[MAP_TYPE_DIFFERENTIATION.md](MAP_TYPE_DIFFERENTIATION.md)** | 5 map types with type-specific features | ~400 |
@@ -114,9 +115,13 @@ After logging in:
 | **Phase 2D** | AI Battles | ✅ COMPLETE | 100% |
 | **Phase 2E** | Crossovers | ✅ COMPLETE | 100% |
 | **Phase 2F** | Mythology Creation Wizard | ✅ COMPLETE | 100% |
-| **Phase 3** | Gamification | ⏸️ PENDING | 0% |
-| **Phase 4** | Collaboration | ⏸️ PENDING | 0% |
-| **Phase 5** | AI Enhancements | ⏸️ PENDING | 0% |
+| **Phase 3** | Gamification (Points, Badges, Levels) | ✅ COMPLETE | 100% |
+| **Phase 4A** | AI Image Generation Core | ✅ COMPLETE | 100% |
+| **Phase 4B** | Battle Integration | ✅ COMPLETE | 100% |
+| **Phase 4C** | Trading Cards & Collectibles | ✅ COMPLETE | 100% |
+| **Phase 4D** | Creative Exports (Comics, Scrolls, Postcards, Posters) | ✅ COMPLETE | 100% |
+| **Phase 4E** | Community Features (Murals, Sharing) | ⏸️ PENDING | 0% |
+| **Phase 5** | Real-time Collaboration | ⏸️ PENDING | 0% |
 | **Phase 6** | Presentations | ⏸️ PENDING | 0% |
 | **Phase 7** | Polish & Launch | ⏸️ PENDING | 0% |
 
@@ -326,6 +331,97 @@ After logging in:
   - Provides authentic naming patterns for each culture
   - Explains meaning and connection for each suggestion
 
+**AI Image Generation (Phase 4A):** 🆕
+- **Math Quiz Token System:**
+  - 20+ problem types across 6 categories (Arithmetic, Fractions, Algebra, Geometry, Decimals, Word Problems)
+  - SVG diagrams for coordinate plane and geometry questions
+  - Streak tracking with bonus multipliers (3+ = ✨, 5+ = 🔥 2×, 10+ = 🔥🔥 3×, 15+ = 🔥🔥🔥 4×)
+  - Configurable questions-per-token (default: 3)
+  - Confetti celebration on correct answers
+  - Teacher-configurable blocked math topics
+- **Dual Image Generation Providers:**
+  - **Primary:** Nano Banana (Gemini 2.5 Flash Image) - $0.039/image
+  - **Fallback:** DALL-E 3 - $0.04-$0.12/image
+  - Provider badge shows which AI generated the image (🍌 or 🎨)
+  - Automatic fallback if primary fails
+- **Triple-Layer Safety System:**
+  - Layer 1: Blocklist (hard-blocked words)
+  - Layer 2: Pattern detection (AI scans for concerning content)
+  - Layer 3: System prompt wrapper (enforces age-appropriate output)
+  - No text/words generated in images
+- **Entity-Specific Prompt Builders:**
+  - Character portraits with personality and domain
+  - Creature illustrations with danger level styling
+  - Realm landscapes with geography
+  - Story scene illustrations
+  - Mythology overview images
+- **Access Control:**
+  - Token-gated for students (earn through math quiz)
+  - Unlimited for teachers/admins (👑 badge)
+  - Hidden dev cheat code (click 🎨 5x quickly → 🔧 Dev Mode)
+- **UI Features:**
+  - Side panel on character pages (70/30 split)
+  - Save/Discard preview before finalizing
+  - Image gallery per user
+  - Teacher moderation dashboard
+- **Database Tables:**
+  - `quiz_attempts` - Math quiz history
+  - `generated_images` - All AI images with metadata
+  - `classroom_image_settings` - Teacher controls
+  - `moderation_log` - Image moderation tracking
+  - Profile columns for `image_tokens` and `quiz_streak`
+
+**Battle Image Integration (Phase 4B):** 🆕
+- **Battle Scene Generation:**
+  - Generate epic battle scenes during combat
+  - Victory celebration cards
+  - Defeat images with dramatic flair
+- **Animated Battle Enhancements:**
+  - Images integrated into battle playback
+  - Champion portraits in combatant cards
+
+**Trading Cards & Collectibles (Phase 4C):** 🆕
+- **Trading Card Generator:**
+  - 5 rarity tiers: Common (45%), Uncommon (25%), Rare (18%), Epic (9%), Legendary (3%)
+  - Unique card designs per rarity with colors and borders
+  - Random rarity rolls with probability weighting
+  - Holographic effects for Epic/Legendary cards
+  - Works for characters and creatures
+- **Character Stat Cards:**
+  - Auto-calculated stats based on character type
+  - Combat stats (HP, ATK, DEF, SPD) with visual bars
+  - Domain and power listings
+  - Professional stat card layout
+- **Collection Gallery:**
+  - View all collected trading cards
+  - Filter by rarity, entity type
+  - Sort by name, rarity, date collected
+  - Card count statistics
+
+**Creative Exports (Phase 4D):** 🆕
+- **Comic Strip Generator:**
+  - Generate 3-panel comic strips from stories
+  - Sequential narrative panels
+  - Story-aware scene generation
+  - Perfect for illustrating key story moments
+- **Prophecy Scroll Generator:**
+  - Ancient scroll-style imagery
+  - Mystical text and prophecy visualization
+  - Aged parchment aesthetic
+  - Great for origin stories and prophecies
+- **Realm Postcard Generator:**
+  - "Greetings from [Realm]" tourism-style postcards
+  - Location-based imagery with landmarks
+  - Integrated on realm detail pages
+  - Also available on character pages (domain postcards)
+  - Also available on creature pages (habitat postcards)
+- **Wanted Poster Generator:**
+  - Classic "WANTED" poster style
+  - AI generates portrait only
+  - CSS overlay adds: WANTED header, name, danger level, crimes, rewards
+  - Perfect for villains and dangerous creatures
+  - Professional Western poster aesthetic
+
 #### ✅ **Gallery & Discovery**
 - Public mythology gallery
 - Search and filter functionality
@@ -344,7 +440,7 @@ After logging in:
 
 ## 🗄️ DATABASE SCHEMA
 
-### **Implemented Tables (17 total)**
+### **Implemented Tables (21 total)**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -372,6 +468,12 @@ After logging in:
 │ ├── crossover_battles    - Cross-mythology battle records           │
 │ ├── teacher_events       - Teacher-created class-wide events        │
 │ └── event_participants   - Event participation tracking             │
+├─────────────────────────────────────────────────────────────────────┤
+│ IMAGE GENERATION TABLES (011_image_generation.sql) 🆕               │
+│ ├── quiz_attempts        - Math quiz history with answers/streaks   │
+│ ├── generated_images     - AI-generated images with metadata        │
+│ ├── classroom_image_settings - Teacher controls for image gen       │
+│ └── moderation_log       - Image moderation tracking                │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -387,6 +489,7 @@ After logging in:
 | `005_realms.sql` | realms | Locations and geography |
 | `007_battle_stories.sql` | battle_stories | Saved battle narrations |
 | `008_crossover_events.sql` | crossover_requests, mythology_alliances, crossover_stories, crossover_battles, teacher_events, event_participants | Cross-mythology interactions |
+| `011_image_generation.sql` | quiz_attempts, generated_images, classroom_image_settings, moderation_log + profile columns | 🆕 AI Image Generation system |
 
 ### **Key Schema Features**
 - UUID primary keys with auto-generation
