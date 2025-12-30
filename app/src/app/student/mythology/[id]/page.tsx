@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import StandardsBadge from '@/components/StandardsBadge';
 
 interface Mythology {
   id: string;
@@ -609,6 +610,13 @@ export default function MythologyDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Floating Standards Badge */}
+      <StandardsBadge 
+        activityType="mythology-creation" 
+        activityName="Mythology Details"
+        position="bottom-right"
+      />
     </div>
   );
 }

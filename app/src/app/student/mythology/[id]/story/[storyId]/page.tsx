@@ -9,6 +9,7 @@ import StarterKit from '@tiptap/starter-kit';
 import ComicStripGenerator from '@/components/ComicStripGenerator';
 import ProphecyScrollGenerator from '@/components/ProphecyScrollGenerator';
 import TradingCardGenerator from '@/components/TradingCardGenerator';
+import StandardsBadge from '@/components/StandardsBadge';
 
 interface Story {
   id: string;
@@ -360,6 +361,13 @@ export default function StoryDetailPage() {
           </button>
         </div>
       </div>
+
+      {/* Floating Standards Badge */}
+      <StandardsBadge 
+        activityType="story-writing" 
+        activityName="Story Details"
+        position="bottom-right"
+      />
     </div>
   );
 }

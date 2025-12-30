@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { AIFieldHelper, AIInputHelper } from '@/components/ai/AIFieldHelper';
 import { CHARACTER_FIELD_CONFIGS } from '@/lib/ai/fieldConfigs';
 import { Sparkles, HelpCircle } from 'lucide-react';
+import StandardsBadge from '@/components/StandardsBadge';
 
 export default function CreateCharacterPage() {
   const params = useParams();
@@ -172,6 +173,8 @@ export default function CreateCharacterPage() {
               onChange={(value) => updateField('name', value)}
               placeholder="Thor, Athena, Gilgamesh..."
               required
+              mythologyId={mythologyId}
+              entityType="character"
             />
 
             {/* Character Type */}
@@ -357,6 +360,13 @@ export default function CreateCharacterPage() {
           </form>
         </div>
       </div>
+
+      {/* Floating Standards Badge */}
+      <StandardsBadge 
+        activityType="character-creation" 
+        activityName="Create Character"
+        position="bottom-right"
+      />
     </div>
   );
 }

@@ -519,6 +519,93 @@ Enhance basic prompt with AI.
 
 ---
 
+## 🤖 AI ASSISTANCE ENDPOINTS
+
+### **POST /api/ai/assist**
+
+Get AI assistance for a specific field.
+
+**Request:**
+```json
+{
+  "userId": "uuid",
+  "type": "field_help",
+  "fieldContext": {
+    "fieldName": "backstory",
+    "currentValue": "Born in ancient times...",
+    "entityType": "character",
+    "mythologyContext": "Greek-inspired ocean mythology"
+  },
+  "assistanceType": "brainstorm"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "content": "Here are some ideas to deepen your character's backstory..."
+}
+```
+
+---
+
+### **POST /api/ai/name-suggestions**
+
+Generate contextual name suggestions for characters/creatures.
+
+**Request:**
+```json
+{
+  "mythologyId": "uuid",
+  "category": "Storm-related",
+  "entityType": "character",
+  "existingName": "optional-name-to-refine"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "suggestions": [
+    { "name": "Thunderan", "explanation": "From thunder, suggests power over storms" },
+    { "name": "Voltaire", "explanation": "Lightning-inspired, sounds powerful yet elegant" },
+    { "name": "Stormweaver", "explanation": "Implies mastery over storm creation" },
+    { "name": "Tempestus", "explanation": "Latin-inspired, formal and powerful" },
+    { "name": "Galeon", "explanation": "Derived from gale, suggests wind mastery" }
+  ]
+}
+```
+
+**Category Options:**
+- Storm-related, Fire-related, Water/Ocean, Earth/Nature
+- Sky/Air, Moon/Night, Sun/Light, Shadow/Dark
+- Wisdom/Knowledge, War/Battle, Love/Beauty, Trickster
+
+---
+
+### **POST /api/ai/cleanup**
+
+Grammar and clarity cleanup for text.
+
+**Request:**
+```json
+{
+  "text": "Text to clean up and improve..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "result": "Improved text with grammar fixes..."
+}
+```
+
+---
+
 ## 🏆 GAMIFICATION ENDPOINTS
 
 ### **GET /api/points**

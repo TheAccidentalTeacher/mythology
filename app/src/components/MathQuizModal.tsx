@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import StandardsModal from './StandardsModal';
+import { getStandardsForActivity } from '@/lib/standards';
 
 interface MathProblem {
   type: string;
@@ -57,6 +59,10 @@ export default function MathQuizModal({
   const [totalInSession, setTotalInSession] = useState(0);
   const [startTime, setStartTime] = useState<number>(0);
   const [selectedMathType, setSelectedMathType] = useState<string>('random');
+  const [showStandardsModal, setShowStandardsModal] = useState(false);
+
+  // Get math standards for this activity
+  const mathStandards = getStandardsForActivity('math-quiz');
 
   // Load a new problem
   const loadProblem = useCallback(async (specificType?: string) => {
@@ -229,6 +235,14 @@ export default function MathQuizModal({
               </svg>
             </button>
           </div>
+          {/* Standards Button */}
+          <button
+            onClick={() => setShowStandardsModal(true)}
+            className="mt-2 flex items-center gap-1 text-xs text-purple-100 hover:text-white transition-colors"
+          >
+            <span>📚</span>
+            <span>View {mathStandards.length} Standards</span>
+          </button>
           
           {/* Stats Bar */}
           <div className="flex gap-4 mt-3 text-sm">
@@ -497,6 +511,14 @@ export default function MathQuizModal({
           Build a streak for bonus tokens! 🔥
         </div>
       </motion.div>
+
+      {/* Standards Modal */}
+      <StandardsModal
+        isOpen={showStandardsModal}
+        onClose={() => setShowStandardsModal(false)}
+        activityType="math-quiz"
+        activityName="Math Quiz"
+      />
     </div>
   );
 }

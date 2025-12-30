@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { AIFieldHelper, AIInputHelper } from '@/components/ai/AIFieldHelper';
 import { CREATURE_FIELD_CONFIGS } from '@/lib/ai/fieldConfigs';
 import { Sparkles, HelpCircle } from 'lucide-react';
+import StandardsBadge from '@/components/StandardsBadge';
 
 export default function CreateCreaturePage() {
   const params = useParams();
@@ -176,6 +177,8 @@ export default function CreateCreaturePage() {
               onChange={(value) => updateField('name', value)}
               placeholder="Cerberus, Phoenix, Kraken..."
               required
+              mythologyId={mythologyId}
+              entityType="creature"
             />
 
             {/* Grid for dropdowns */}
@@ -441,6 +444,13 @@ export default function CreateCreaturePage() {
           </form>
         </div>
       </div>
+
+      {/* Floating Standards Badge */}
+      <StandardsBadge 
+        activityType="creature-creation" 
+        activityName="Create Creature"
+        position="bottom-right"
+      />
     </div>
   );
 }

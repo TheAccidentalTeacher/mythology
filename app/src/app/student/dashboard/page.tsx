@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Database } from '@/types/database.types';
+import StandardsBadge from '@/components/StandardsBadge';
 
 type Mythology = Database['public']['Tables']['mythologies']['Row'];
 
@@ -251,6 +252,13 @@ export default function StudentDashboard() {
           )}
         </div>
       </main>
+
+      {/* Floating Standards Badge */}
+      <StandardsBadge 
+        activityType="mythology-creation" 
+        activityName="Mythology Dashboard"
+        position="bottom-right"
+      />
     </div>
   );
 }

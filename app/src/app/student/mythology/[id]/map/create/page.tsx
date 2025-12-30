@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import MapCanvas from '@/components/MapCanvas';
+import VoiceTextarea from '@/components/VoiceTextarea';
 import { MapType, MAP_TYPE_CONFIGS, getDefaultCanvasDimensions, getMarkersForType, getInstructionsForType } from '@/lib/mapTypes';
 
 interface Location {
@@ -144,13 +145,12 @@ export default function CreateMapPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-white font-medium mb-2">Description (Optional)</label>
-              <textarea
+              <VoiceTextarea
+                label="Description (Optional)"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(value) => setFormData({ ...formData, description: value })}
                 rows={3}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                placeholder="Describe the geography, climate, or key features..."
+                placeholder="Describe the geography, climate, or key features... (Tip: Click the microphone to use voice input!)"
               />
             </div>
 

@@ -1,14 +1,21 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import StandardsSection from '@/components/StandardsSection';
+import StandardsNavLink from '@/components/StandardsNavLink';
 
 export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-900 via-purple-900 to-pink-900">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
+        {/* Standards Link in top corner */}
+        <div className="absolute top-4 right-4">
+          <StandardsNavLink className="bg-white/10 backdrop-blur-sm border border-white/20" />
+        </div>
+
         <div className="text-center space-y-8">
           {/* Title */}
           <div className="space-y-4">
@@ -78,9 +85,15 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Educational Standards Section */}
+      <StandardsSection className="bg-slate-900/50" />
+
       {/* Footer */}
-      <div className="absolute bottom-8 left-0 right-0 text-center text-gray-500 text-sm">
+      <div className="py-8 text-center text-gray-500 text-sm">
         <p>Built for 6th-8th grade students • COPPA/FERPA Compliant</p>
+        <p className="mt-2 text-gray-600">
+          Aligned with Alaska State Standards & Common Core
+        </p>
       </div>
     </div>
   );

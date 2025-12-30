@@ -1,9 +1,10 @@
 # 🤖 AI ASSISTANCE SYSTEM - FEATURE SPECIFICATION
 
-**Document Version:** 1.0  
+**Document Version:** 2.0  
 **Created:** December 25, 2025  
-**Status:** Planning Phase  
-**Priority:** Phase 4 Implementation  
+**Last Updated:** December 30, 2025  
+**Status:** ✅ Core Features Implemented  
+**Priority:** Phase 2F Implementation  
 **Target Audience:** 6th-8th Grade Students (TikTok Generation)
 
 ---
@@ -25,6 +26,8 @@
 13. [UI/UX Specifications](#uiux-specifications)
 14. [Implementation Roadmap](#implementation-roadmap)
 15. [Success Metrics](#success-metrics)
+16. [Voice Input System](#voice-input-system) 🆕
+17. [AI-Powered Name Suggestions](#ai-powered-name-suggestions) 🆕
 
 ---
 
@@ -42,12 +45,14 @@ An AI assistance system that acts as an **"Extended Mind"** - a creative partner
 > **"AI should not write the mythology, but AI should help the students write the mythology."**
 
 ### Key Features
-| Feature | Description | Priority |
-|---------|-------------|----------|
-| **Mythology Creation Wizard** | Epic multi-step onboarding experience | 🔴 Critical |
-| **Per-Field Help Buttons** | 💡 contextual AI assistance on every input | 🔴 Critical |
-| **Dynamic Assistance Levels** | Guide Me / Support Me / Challenge Me | 🟡 High |
-| **Grammar Engine** | Grammarly-style inline suggestions | 🟡 High |
+| Feature | Description | Priority | Status |
+|---------|-------------|----------|--------|
+| **Mythology Creation Wizard** | Epic multi-step onboarding experience | 🔴 Critical | ✅ Complete |
+| **Per-Field Help Buttons** | 💡 contextual AI assistance on every input | 🔴 Critical | ✅ Complete |
+| **Voice Input System** | 🎙️ Real-time speech-to-text for all fields | 🔴 Critical | ✅ Complete |
+| **AI Name Suggestions** | 🎯 Contextual name generation | 🟡 High | ✅ Complete |
+| **Dynamic Assistance Levels** | Guide Me / Support Me / Challenge Me | 🟡 High | ⏸️ Planned |
+| **Grammar Engine** | Grammarly-style inline suggestions | 🟡 High | ✅ Basic |
 | **Five Themes of Geography** | Academic grounding in geography standards | 🟢 Medium |
 | **Teacher AI Dashboard** | Visibility into student AI usage | 🟢 Medium |
 
@@ -1304,6 +1309,177 @@ The wizard should feel "epic" and engaging:
 
 ---
 
+## 🎙️ VOICE INPUT SYSTEM
+
+**Status:** ✅ Implemented (December 30, 2025)
+
+### Overview
+
+Voice input allows students to speak instead of type, with real-time transcription preview. This accessibility feature is particularly valuable for students who struggle with typing or prefer verbal expression.
+
+### Technical Implementation
+
+**Web Speech API Integration:**
+```typescript
+// Core setup
+const recognition = new webkitSpeechRecognition();
+recognition.continuous = true;
+recognition.interimResults = true; // Enable real-time preview
+recognition.lang = 'en-US';
+
+// Handle results
+recognition.onresult = (event) => {
+  let interimTranscript = '';
+  let finalTranscript = '';
+  
+  for (let i = event.resultIndex; i < event.results.length; i++) {
+    const transcript = event.results[i][0].transcript;
+    if (event.results[i].isFinal) {
+      finalTranscript += transcript;
+    } else {
+      interimTranscript += transcript;
+    }
+  }
+  
+  setInterimText(interimTranscript);  // Shows live as they speak
+  if (finalTranscript) {
+    onAddText(finalTranscript);       // Commits when they pause
+    setInterimText('');
+  }
+};
+```
+
+### Components with Voice Input
+
+| Component | Location | Notes |
+|-----------|----------|-------|
+| `MythologyWizard.tsx` | Five Themes step | All 5 geography themes support voice |
+| `AIFieldHelper.tsx` | All form fields | Universal voice support |
+| `RichTextEditor.tsx` | Story editor | Full story dictation support |
+
+### User Experience
+
+**Visual Feedback:**
+- 🎙️ Microphone button indicates voice is available
+- 🔴 Recording indicator with pulsing animation
+- 📝 Live preview shows text as student speaks
+- ✅ Clear indication when transcription is committed
+
+**Interim Text Preview:**
+```tsx
+{isListening && interimText && (
+  <div className="mt-2 text-sm text-gray-500 animate-pulse">
+    <span className="font-medium">🎙️ Hearing: </span>
+    <span className="italic">{interimText}</span>
+  </div>
+)}
+```
+
+### Browser Support
+
+| Browser | Support | Notes |
+|---------|---------|-------|
+| Chrome | ✅ Full | Recommended |
+| Edge | ✅ Full | Uses Chromium engine |
+| Safari | ⚠️ Partial | May require permissions |
+| Firefox | ❌ Limited | Not recommended |
+
+---
+
+## 🎯 AI-POWERED NAME SUGGESTIONS
+
+**Status:** ✅ Implemented (December 30, 2025)
+
+### Overview
+
+When creating characters or creatures, students can click category pills (like "Storm-related" or "Fire-related") to get AI-generated name suggestions that are contextual to their mythology.
+
+### API Endpoint
+
+**`POST /api/ai/name-suggestions`**
+
+**Request Body:**
+```json
+{
+  "mythologyId": "uuid",
+  "category": "Storm-related",
+  "entityType": "character",
+  "existingName": "optional-current-name"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "suggestions": [
+    { "name": "Thunderan", "explanation": "From thunder, suggests power over storms" },
+    { "name": "Voltaire", "explanation": "Lightning-inspired, sounds powerful yet elegant" },
+    { "name": "Stormweaver", "explanation": "Implies mastery over storm creation" }
+  ]
+}
+```
+
+### Context Building
+
+The AI considers all available context:
+- Mythology name and genre
+- Geography type and setting
+- Cultural inspiration
+- Five Themes answers (location, place, interaction, movement, regions)
+- Existing name (for variations)
+- Entity type (character vs creature)
+
+### Category Pills
+
+| Category | Suggested For |
+|----------|---------------|
+| Storm-related | Weather deities, elementals |
+| Fire-related | Forge gods, fire spirits |
+| Water/Ocean | Sea deities, water creatures |
+| Earth/Nature | Earth mothers, forest guardians |
+| Sky/Air | Wind gods, sky beings |
+| Moon/Night | Lunar deities, nocturnal creatures |
+| Sun/Light | Solar deities, light beings |
+| Shadow/Dark | Death gods, shadow creatures |
+| Wisdom/Knowledge | Scholarly deities, sages |
+| War/Battle | War gods, warriors |
+| Love/Beauty | Love deities, muses |
+| Trickster | Trickster gods, shapeshifters |
+
+### Prompt Template
+
+```typescript
+const prompt = `You are helping a middle school student name a ${entityType} 
+for their original mythology called "${mythology.name}".
+
+Context:
+- Genre: ${mythology.genre}
+- Setting: ${mythology.geography_type}
+- Cultural inspiration: ${mythology.cultural_inspiration}
+- World description: ${mythology.setting_description}
+
+Generate 5 unique name suggestions that:
+1. Fit the "${category}" theme
+2. Sound mythological, powerful, and memorable
+3. Would fit naturally in their mythology
+4. Are appropriate for middle school students
+5. Are original (not famous names like Zeus or Thor)
+
+Format: Numbered list with **Name** - Brief explanation`;
+```
+
+### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `api/ai/name-suggestions/route.ts` | API endpoint |
+| `components/ai/AIFieldHelper.tsx` | AIInputHelper component |
+| `character/create/page.tsx` | Passes context props |
+| `creature/create/page.tsx` | Passes context props |
+
+---
+
 ## 📚 REFERENCES
 
 ### Related Documentation
@@ -1313,28 +1489,38 @@ The wizard should feel "epic" and engaging:
 - [README.md](README.md) - Project overview
 - [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) - Full schema reference
 - [docs/STUDENT_GUIDE.md](docs/STUDENT_GUIDE.md) - Student documentation
+- [CHANGELOG.md](CHANGELOG.md) - Implementation history
 
 ### External Resources
 
 - [Five Themes of Geography](https://www.nationalgeographic.org/education/) - NCGE standards
 - [OpenAI API Documentation](https://platform.openai.com/docs/) - AI integration
+- [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) - Voice input
 - [LanguageTool API](https://languagetool.org/http-api/) - Grammar checking
 - [TipTap Extensions](https://tiptap.dev/extensions) - Rich text editor
 
 ---
 
-## ✅ APPROVAL CHECKLIST
+## ✅ IMPLEMENTATION STATUS
 
-Before implementation, confirm:
+### Completed Features ✅
 
-- [ ] Philosophy aligns with educational goals
-- [ ] Weird mythology support is adequate
-- [ ] Geography integration meets standards
-- [ ] Teacher controls are sufficient
-- [ ] UI/UX matches existing design
-- [ ] Technical approach is feasible
-- [ ] Timeline is realistic
-- [ ] Success metrics are measurable
+- [x] Mythology Creation Wizard (5 steps)
+- [x] Five Themes of Geography integration
+- [x] Per-field AI help buttons
+- [x] AIFieldHelper component
+- [x] Voice input with real-time preview
+- [x] AI-powered name suggestions
+- [x] Grammar cleanup integration
+- [x] Context-aware prompts
+
+### Pending Features ⏸️
+
+- [ ] Dynamic assistance levels (Guide Me / Support Me / Challenge Me)
+- [ ] Teacher AI Dashboard
+- [ ] AI usage analytics
+- [ ] Advanced grammar engine
+- [ ] Weird mythology special handling
 
 ---
 

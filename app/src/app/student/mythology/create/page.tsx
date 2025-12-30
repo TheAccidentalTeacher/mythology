@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { z } from 'zod';
 import { MythologyWizard } from '@/components/ai';
 import { Wand2, PenTool, Sparkles } from 'lucide-react';
+import StandardsBadge from '@/components/StandardsBadge';
+import VoiceTextarea from '@/components/VoiceTextarea';
 
 const mythologySchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -213,20 +215,17 @@ export default function CreateMythology() {
 
           {/* Description */}
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-            <label className="block text-white font-semibold mb-2">
-              Description *
-            </label>
-            <textarea
+            <VoiceTextarea
+              label="Description"
               value={formData.description || ''}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Describe your mythology world... What makes it unique? What themes does it explore?"
+              onChange={(value) => handleChange('description', value)}
+              placeholder="Describe your mythology world... What makes it unique? What themes does it explore? (Tip: Click the microphone to use voice input!)"
               rows={4}
-              className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              required
+              minLength={50}
+              helpText={`Minimum 50 characters. Current: ${formData.description?.length || 0}`}
             />
             {errors.description && <p className="text-red-300 text-sm mt-2">{errors.description}</p>}
-            <p className="text-gray-400 text-sm mt-2">
-              Minimum 50 characters. Current: {formData.description?.length || 0}
-            </p>
           </div>
 
           {/* Timeframe & Genre */}
@@ -308,15 +307,12 @@ export default function CreateMythology() {
 
           {/* Setting Description */}
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-            <label className="block text-white font-semibold mb-2">
-              Setting Description (Optional)
-            </label>
-            <textarea
+            <VoiceTextarea
+              label="Setting Description (Optional)"
               value={formData.setting_description || ''}
-              onChange={(e) => handleChange('setting_description', e.target.value)}
-              placeholder="Describe the physical world, climate, key locations..."
+              onChange={(value) => handleChange('setting_description', value)}
+              placeholder="Describe the physical world, climate, key locations... (Tip: Click the microphone to use voice input!)"
               rows={3}
-              className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
@@ -404,6 +400,13 @@ export default function CreateMythology() {
         </form>
         )}
       </div>
+
+      {/* Floating Standards Badge */}
+      <StandardsBadge 
+        activityType="mythology-creation" 
+        activityName="Create Mythology"
+        position="bottom-right"
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditor';
 import { HelpCircle, Sparkles, Lightbulb } from 'lucide-react';
+import StandardsBadge from '@/components/StandardsBadge';
 
 interface Character {
   id: string;
@@ -488,6 +489,13 @@ export default function CreateStoryPage() {
           </form>
         </div>
       </div>
+
+      {/* Floating Standards Badge */}
+      <StandardsBadge 
+        activityType="story-writing" 
+        activityName="Write a Story"
+        position="bottom-right"
+      />
     </div>
   );
 }

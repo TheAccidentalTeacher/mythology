@@ -68,6 +68,9 @@ Now add characters to your mythology!
 2. **Fill in the details:**
 
    **Name:** Zeus, Athena, Thunderstrike, Cyberia (your choice!)
+   - 💡 **Stuck on a name?** Click a category like "Storm-related" or "Fire-related"
+   - AI will suggest 5 unique names that fit YOUR mythology!
+   - Each suggestion includes what it means
 
    **Title:** What are they known for?
    - "God of Thunder"
@@ -184,6 +187,7 @@ Bring your mythology to life with an epic tale!
    - Use the **rich text editor** (like Google Docs)
    - Format: Bold, italics, headings, bullet points
    - Add images if you want
+   - 🎙️ **Voice Input:** Click the microphone to speak instead of type!
 
 4. **Need help?** Click **"AI Assist"**
    - Ask: "How should Zeus confront Poseidon?"
@@ -231,7 +235,30 @@ Compete (friendly!) with classmates:
 
 ## 🎨 COOL FEATURES TO TRY
 
-### **1. AI Image Generation** 🆕
+### **1. Voice Input** 🆕🎙️
+
+Don't like typing? **Speak instead!**
+
+**How to Use:**
+1. Look for the **🎙️ microphone button** next to any text field
+2. Click it to start recording (turns red 🔴)
+3. **Speak clearly** - watch your words appear in real-time!
+4. Click again to stop when done
+
+**Where Voice Works:**
+- All text fields (name, description, backstory, etc.)
+- Story editor
+- Five Themes of Geography questions
+
+**Tips for Best Results:**
+- Use Chrome or Edge browser
+- Speak in complete sentences
+- Talk at a normal pace
+- Your text shows up as you speak!
+
+---
+
+### **2. AI Image Generation**
 
 Generate amazing AI artwork for your mythology!
 

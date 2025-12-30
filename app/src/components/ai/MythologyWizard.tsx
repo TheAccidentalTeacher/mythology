@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { 
@@ -18,11 +18,75 @@ import {
   ChevronLeft,
   Check,
   Loader2,
-  X
+  X,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import { useWizardProgress, type WizardStep } from '@/hooks/useWizardProgress';
 import { MYTHOLOGY_CATEGORIES, type WizardData } from '@/lib/ai/prompts';
 import { useAIAssistance } from '@/hooks/useAIAssistance';
+
+// =====================================================
+// WEB SPEECH API TYPES FOR VOICE INPUT
+// =====================================================
+
+interface SpeechRecognitionResult {
+  readonly length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  readonly resultIndex: number;
+  readonly results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  readonly error: string;
+  readonly message: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => void) | null;
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  }
+}
+
+// Minimum characters required for each theme
+const MIN_THEME_CHARS = 30;
+
+// Five themes constant (defined outside component to prevent recreation on each render)
+const THEMES = ['location', 'place', 'interaction', 'movement', 'regions'] as const;
 
 // =====================================================
 // STEP COMPONENTS
@@ -1028,16 +1092,143 @@ function FiveThemesStep({
   const [currentTheme, setCurrentTheme] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
-  const themes = ['location', 'place', 'interaction', 'movement', 'regions'] as const;
+  // Use THEMES constant from module scope
 
   const [answers, setAnswers] = useState<Record<string, string>>(data.five_themes || {});
   
-  const currentThemeData = FIVE_THEMES_DATA[themes[currentTheme]];
+  // Voice input state
+  const [isListening, setIsListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [isCleaningUp, setIsCleaningUp] = useState(false);
+  const [interimText, setInterimText] = useState(''); // Show text as user speaks
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  
+  const currentThemeData = FIVE_THEMES_DATA[THEMES[currentTheme]];
 
-  const handleAnswerChange = (theme: string, value: string) => {
-    const newAnswers = { ...answers, [theme]: value };
-    setAnswers(newAnswers);
-    onUpdate({ five_themes: newAnswers });
+  // Check for voice support on mount
+  useEffect(() => {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    setVoiceSupported(!!SpeechRecognitionAPI);
+  }, []);
+
+  const handleAnswerChange = useCallback((theme: string, value: string) => {
+    setAnswers(prev => {
+      const newAnswers = { ...prev, [theme]: value };
+      // Schedule parent update outside of state setter to avoid "setState during render" error
+      setTimeout(() => onUpdate({ five_themes: newAnswers }), 0);
+      return newAnswers;
+    });
+  }, [onUpdate]);
+
+  // Voice input handlers
+  const startListening = useCallback(() => {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) return;
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setVoiceError(null);
+    };
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript;
+        } else {
+          interimTranscript += result[0].transcript;
+        }
+      }
+
+      // Show interim results as user speaks
+      setInterimText(interimTranscript);
+
+      if (finalTranscript) {
+        const currentThemeKey = THEMES[currentTheme];
+        setAnswers(prev => {
+          const currentValue = prev[currentThemeKey] || '';
+          const newValue = currentValue ? `${currentValue} ${finalTranscript}` : finalTranscript;
+          const newAnswers = { ...prev, [currentThemeKey]: newValue };
+          // Schedule parent update outside of state setter to avoid "setState during render" error
+          setTimeout(() => onUpdate({ five_themes: newAnswers }), 0);
+          return newAnswers;
+        });
+        // Clear interim text once finalized
+        setInterimText('');
+      }
+    };
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        setVoiceError('Microphone access denied. Please allow microphone access.');
+      } else if (event.error === 'no-speech') {
+        setVoiceError('No speech detected. Try again.');
+      } else {
+        setVoiceError(`Error: ${event.error}`);
+      }
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  }, [currentTheme, onUpdate]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+    setInterimText('');
+  }, []);
+
+  const toggleVoice = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening, startListening, stopListening]);
+
+  // AI cleanup for voice input
+  const handleAICleanup = async () => {
+    const currentThemeKey = THEMES[currentTheme];
+    const text = answers[currentThemeKey];
+    if (!text?.trim()) return;
+    
+    setIsCleaningUp(true);
+    try {
+      const res = await fetch('/api/ai/cleanup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, mode: 'cleanup' }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.cleaned) {
+          handleAnswerChange(currentThemeKey, data.cleaned);
+        }
+      }
+    } catch (err) {
+      console.error('AI cleanup error:', err);
+    } finally {
+      setIsCleaningUp(false);
+    }
   };
 
   const getRandomHint = () => {
@@ -1047,12 +1238,25 @@ function FiveThemesStep({
     setShowHint(true);
   };
 
+  // Helper to check if a theme is complete
+  const isThemeComplete = (theme: string) => {
+    return answers[theme] && answers[theme].trim().length >= MIN_THEME_CHARS;
+  };
+
+  // Count completed themes
+  const completedCount = THEMES.filter(t => isThemeComplete(t)).length;
+
   // Reset hint when changing themes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowHint(false);
-     
     setCurrentHintIndex(0);
+    // Stop voice when changing themes
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+      setIsListening(false);
+      setInterimText('');
+    }
   }, [currentTheme]);
 
   return (
@@ -1065,11 +1269,28 @@ function FiveThemesStep({
         <p className="text-gray-400 text-sm">
           Real geographers use these themes to understand places. Let&apos;s use them to build your mythology!
         </p>
+        {/* Required Notice */}
+        <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/20 border border-amber-500/40 rounded-full text-amber-300 text-xs">
+          <span>⭐</span>
+          <span>All 5 themes are required (minimum {MIN_THEME_CHARS} characters each)</span>
+        </div>
       </div>
+
+      {/* Progress Bar */}
+      <div className="bg-gray-800/50 rounded-full h-3 overflow-hidden border border-gray-700">
+        <div 
+          className="h-full bg-linear-to-r from-amber-500 to-green-500 transition-all duration-500"
+          style={{ width: `${(completedCount / 5) * 100}%` }}
+        />
+      </div>
+      <p className="text-center text-sm text-gray-400">
+        {completedCount}/5 themes completed
+        {completedCount === 5 && <span className="text-green-400 ml-2">🎉 All done!</span>}
+      </p>
 
       {/* Theme Navigation Pills */}
       <div className="flex justify-center gap-2 flex-wrap">
-        {themes.map((theme, index) => (
+        {THEMES.map((theme, index) => (
           <button
             key={theme}
             onClick={() => setCurrentTheme(index)}
@@ -1077,15 +1298,19 @@ function FiveThemesStep({
               px-3 py-2 rounded-full flex items-center gap-2 text-sm transition-all
               ${currentTheme === index 
                 ? 'bg-amber-500 text-white scale-105' 
-                : answers[theme] 
+                : isThemeComplete(theme) 
                   ? 'bg-green-500/30 text-green-300 border border-green-500/50' 
-                  : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                  : 'bg-gray-700 text-gray-400 hover:bg-gray-600 border border-red-500/30'
               }
             `}
           >
             <span>{FIVE_THEMES_DATA[theme].emoji}</span>
             <span className="hidden sm:inline">{FIVE_THEMES_DATA[theme].title}</span>
-            {answers[theme] && <span className="text-green-400">✓</span>}
+            {isThemeComplete(theme) ? (
+              <span className="text-green-400">✓</span>
+            ) : (
+              <span className="text-red-400/60 text-xs">*</span>
+            )}
           </button>
         ))}
       </div>
@@ -1095,18 +1320,66 @@ function FiveThemesStep({
         key={currentTheme}
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden"
+        className={`bg-gray-800/50 rounded-xl border overflow-hidden ${
+          isThemeComplete(THEMES[currentTheme]) ? 'border-green-500/50' : 'border-gray-700'
+        }`}
       >
         {/* Theme Header */}
-        <div className="bg-linear-to-r from-amber-500/20 to-orange-500/20 p-4 border-b border-gray-700">
-          <h3 className="text-xl font-bold text-amber-400 flex items-center gap-2">
-            <span className="text-2xl">{currentThemeData.emoji}</span>
-            {currentThemeData.title}
-          </h3>
+        <div className={`p-4 border-b border-gray-700 ${
+          isThemeComplete(THEMES[currentTheme]) 
+            ? 'bg-linear-to-r from-green-500/20 to-emerald-500/20' 
+            : 'bg-linear-to-r from-amber-500/20 to-orange-500/20'
+        }`}>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-amber-400 flex items-center gap-2">
+              <span className="text-2xl">{currentThemeData.emoji}</span>
+              {currentThemeData.title}
+              {isThemeComplete(THEMES[currentTheme]) && (
+                <span className="text-green-400 text-sm ml-2">✓ Complete</span>
+              )}
+            </h3>
+            {/* Voice Input Button */}
+            {voiceSupported && (
+              <button
+                type="button"
+                onClick={toggleVoice}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                  isListening
+                    ? 'bg-red-500 text-white animate-pulse'
+                    : 'bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30'
+                }`}
+                title={isListening ? 'Stop recording' : 'Start voice input'}
+              >
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                <span className="text-sm">{isListening ? 'Stop' : 'Voice Input'}</span>
+              </button>
+            )}
+          </div>
           <p className="text-gray-300 mt-1">{currentThemeData.subtitle}</p>
         </div>
 
         <div className="p-4 space-y-4">
+          {/* Voice Recording Indicator */}
+          {isListening && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-500/10 border border-red-500/30 rounded-lg p-3"
+            >
+              <p className="text-red-300 text-sm flex items-center gap-2">
+                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                🎤 Recording... speak clearly. Click &quot;Stop&quot; when done.
+              </p>
+            </motion.div>
+          )}
+
+          {/* Voice Error */}
+          {voiceError && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2">
+              <p className="text-red-400 text-xs">⚠️ {voiceError}</p>
+            </div>
+          )}
+
           {/* What is this theme? */}
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
             <h4 className="text-blue-400 font-medium text-sm mb-1">💡 What is this theme?</h4>
@@ -1154,11 +1427,11 @@ function FiveThemesStep({
                 <button
                   key={i}
                   onClick={() => {
-                    const current = answers[themes[currentTheme]] || '';
+                    const current = answers[THEMES[currentTheme]] || '';
                     const newValue = current 
                       ? `${current}${current.endsWith('.') || current.endsWith('!') ? ' ' : '. '}${starter.text}`
                       : starter.text;
-                    handleAnswerChange(themes[currentTheme], newValue);
+                    handleAnswerChange(THEMES[currentTheme], newValue);
                   }}
                   className="flex items-center gap-1 px-2 py-1 bg-gray-700/50 text-gray-300 rounded-lg hover:bg-amber-500/20 hover:text-amber-300 transition-colors text-sm border border-gray-600 hover:border-amber-500/50"
                 >
@@ -1171,19 +1444,83 @@ function FiveThemesStep({
 
           {/* Answer Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              ✍️ Your answer for {currentThemeData.title}:
-            </label>
-            <textarea
-              value={answers[themes[currentTheme]] || ''}
-              onChange={(e) => handleAnswerChange(themes[currentTheme], e.target.value)}
-              placeholder={`Describe the ${currentThemeData.title.toLowerCase()} in your mythology...`}
-              className="w-full h-28 bg-gray-900 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 resize-none"
-            />
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-gray-300">
+                ✍️ Your answer for {currentThemeData.title}:
+                <span className="text-red-400 ml-1">*</span>
+              </label>
+              <div className="flex items-center gap-2">
+                {voiceSupported && (
+                  <span className="text-green-400/60 text-xs flex items-center gap-1">
+                    <Mic className="w-3 h-3" />
+                    Voice available
+                  </span>
+                )}
+                <span className={`text-xs ${
+                  (answers[THEMES[currentTheme]]?.length || 0) >= MIN_THEME_CHARS 
+                    ? 'text-green-400' 
+                    : 'text-amber-400'
+                }`}>
+                  {answers[THEMES[currentTheme]]?.length || 0}/{MIN_THEME_CHARS}+ chars
+                </span>
+              </div>
+            </div>
+            <div className="relative">
+              <textarea
+                value={answers[THEMES[currentTheme]] || ''}
+                onChange={(e) => handleAnswerChange(THEMES[currentTheme], e.target.value)}
+                placeholder={isListening 
+                  ? '🎤 Listening... speak now!' 
+                  : `Describe the ${currentThemeData.title.toLowerCase()} in your mythology... (Tip: Click Voice Input above or the microphone!)`
+                }
+                className={`w-full h-28 bg-gray-900 border rounded-lg p-3 pr-12 text-white placeholder-gray-500 focus:ring-1 resize-none ${
+                  isListening 
+                    ? 'border-red-500/50 bg-red-500/5 focus:border-red-500 focus:ring-red-500' 
+                    : isThemeComplete(THEMES[currentTheme])
+                      ? 'border-green-500/50 focus:border-green-500 focus:ring-green-500'
+                      : 'border-gray-600 focus:border-amber-500 focus:ring-amber-500'
+                }`}
+              />
+              {/* Inline Voice Button */}
+              {voiceSupported && (
+                <button
+                  type="button"
+                  onClick={toggleVoice}
+                  className={`absolute right-3 top-3 p-2 rounded-lg transition-all ${
+                    isListening
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                  }`}
+                  title={isListening ? 'Stop recording' : 'Start voice input'}
+                >
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </button>
+              )}
+            </div>
+            
+            {/* Live speech preview - shows what user is saying in real-time */}
+            {isListening && interimText && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2 mt-2">
+                <p className="text-red-300 text-sm flex items-center gap-2">
+                  <span className="animate-pulse">🎤</span>
+                  <span className="italic">{interimText}</span>
+                  <span className="text-red-400/50 text-xs">(listening...)</span>
+                </p>
+              </div>
+            )}
+            
+            {/* Character requirement indicator */}
+            {(answers[THEMES[currentTheme]]?.length || 0) > 0 && 
+             (answers[THEMES[currentTheme]]?.length || 0) < MIN_THEME_CHARS && (
+              <p className="text-amber-400 text-xs mt-1">
+                ✏️ Need {MIN_THEME_CHARS - (answers[THEMES[currentTheme]]?.length || 0)} more characters
+              </p>
+            )}
           </div>
 
-          {/* Stuck? Button */}
-          <div className="flex items-center gap-3">
+          {/* Action Buttons Row */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Stuck? Button */}
             <button
               onClick={getRandomHint}
               className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 text-amber-400 rounded-lg hover:bg-amber-500/20 transition-colors text-sm border border-amber-500/30"
@@ -1191,8 +1528,30 @@ function FiveThemesStep({
               <Sparkles className="w-4 h-4" />
               {showHint ? 'Another Hint?' : 'Stuck? Get a Hint!'}
             </button>
-            {answers[themes[currentTheme]] && (
-              <span className="text-green-400 text-sm">✓ Nice work!</span>
+            
+            {/* AI Cleanup Button */}
+            {(answers[THEMES[currentTheme]]?.length || 0) > 20 && (
+              <button
+                onClick={handleAICleanup}
+                disabled={isCleaningUp}
+                className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg hover:bg-green-500/20 transition-colors text-sm border border-green-500/30 disabled:opacity-50"
+              >
+                {isCleaningUp ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Fixing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    ✏️ Fix Spelling
+                  </>
+                )}
+              </button>
+            )}
+            
+            {isThemeComplete(THEMES[currentTheme]) && (
+              <span className="text-green-400 text-sm">✓ Complete!</span>
             )}
           </div>
 
@@ -1223,12 +1582,12 @@ function FiveThemesStep({
         </button>
         
         <span className="text-gray-500 text-sm">
-          {currentTheme + 1} of {themes.length}
+          {currentTheme + 1} of {THEMES.length}
         </span>
 
         <button
-          onClick={() => setCurrentTheme(Math.min(themes.length - 1, currentTheme + 1))}
-          disabled={currentTheme === themes.length - 1}
+          onClick={() => setCurrentTheme(Math.min(THEMES.length - 1, currentTheme + 1))}
+          disabled={currentTheme === THEMES.length - 1}
           className="flex items-center gap-2 px-4 py-2 text-amber-400 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           Next
@@ -1236,11 +1595,23 @@ function FiveThemesStep({
         </button>
       </div>
 
-      {/* Progress Summary */}
-      <div className="text-center text-sm text-gray-500">
-        {Object.keys(answers).filter(k => answers[k]).length} of 5 themes completed
-        {Object.keys(answers).filter(k => answers[k]).length === 5 && (
-          <span className="text-green-400 ml-2">🎉 All done! Click Next to continue.</span>
+      {/* Progress Summary - Updated to show actual completion status */}
+      <div className="text-center">
+        {completedCount < 5 ? (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
+            <p className="text-amber-300">
+              ⭐ <strong>{completedCount}/5 themes complete.</strong> Complete all 5 themes to continue.
+            </p>
+            <p className="text-gray-400 text-xs mt-1">
+              Each theme needs at least {MIN_THEME_CHARS} characters.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm">
+            <p className="text-green-300">
+              🎉 <strong>All 5 themes complete!</strong> Great work! Click &quot;Next&quot; to name your mythology.
+            </p>
+          </div>
         )}
       </div>
     </div>
@@ -1493,8 +1864,14 @@ export function MythologyWizard({ isOpen, onClose, onComplete }: MythologyWizard
         return !!data.category;
       case 'geography':
         return !!data.geography?.environment;
-      case 'five_themes':
-        return true; // Optional
+      case 'five_themes': {
+        // ALL 5 themes are REQUIRED with minimum content
+        if (!data.five_themes) return false;
+        return THEMES.every(theme => {
+          const value = data.five_themes?.[theme];
+          return value && value.trim().length >= MIN_THEME_CHARS;
+        });
+      }
       case 'name':
         return !!data.selected_name;
       case 'preview':

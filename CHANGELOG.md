@@ -1,5 +1,84 @@
 # Mythology Project - Changelog
 
+## December 30, 2025
+
+### 🎙️ Voice Input Enhancements & AI-Powered Name Suggestions
+
+#### Real-Time Voice Transcription Preview
+
+**Problem Solved:**
+Voice input previously showed no feedback while speaking - students had to wait until they stopped speaking to see any text. This was confusing and made it hard to know if voice input was working.
+
+**Solution Implemented:**
+Added real-time interim text preview that shows transcription as students speak, providing immediate visual feedback.
+
+**Components Updated:**
+- ✅ `MythologyWizard.tsx` - Five Themes voice input now shows live text
+- ✅ `AIFieldHelper.tsx` - Field helper voice input shows live text  
+- ✅ `RichTextEditor.tsx` - Story editor voice input shows live text
+
+**Technical Details:**
+- Added `interimText` state to track live transcription
+- Web Speech API's `interimResults` captures partial transcription
+- Live preview styled with pulsing animation and gray italic text
+- Text clears automatically when finalized or recording stops
+- Fixed React "setState during render" error with `setTimeout()` pattern
+
+#### AI-Powered Character/Creature Name Suggestions
+
+**Problem Solved:**
+The AI assist button in Character Name field showed static fallback suggestions that weren't contextual to the student's mythology.
+
+**Solution Implemented:**
+Category pills (Storm-related, Fire-related, etc.) now use AI to generate contextual name suggestions based on the mythology's theme, genre, geography, and cultural inspiration.
+
+**New API Endpoint:**
+- ✅ `/api/ai/name-suggestions` - POST endpoint for contextual name generation
+  - Fetches mythology context (name, genre, geography, five_themes, cultural_inspiration)
+  - Builds custom prompt for name generation based on selected category
+  - Uses `aiClient.request()` with `requestType: 'brainstorm'`
+  - Parses AI response to extract name/explanation pairs
+  - Returns 5 unique name suggestions with explanations
+
+**AIInputHelper Component Enhanced:**
+- ✅ New props: `mythologyId`, `entityType` for context
+- ✅ AI-generated names with brief explanations
+- ✅ Loading state per category pill
+- ✅ Error handling with friendly messages
+- ✅ Clickable suggestions that populate the field
+
+**Pages Updated:**
+- ✅ `character/create/page.tsx` - Passes mythologyId and entityType="character"
+- ✅ `creature/create/page.tsx` - Passes mythologyId and entityType="creature"
+
+#### Bug Fixes
+
+**React setState During Render Error:**
+- Fixed: `Cannot update a component while rendering a different component`
+- Location: MythologyWizard.tsx Five Themes step
+- Root cause: `onUpdate()` called inside `setAnswers()` state setter
+- Solution: Wrapped in `setTimeout(() => onUpdate({ five_themes: newAnswers }), 0)`
+
+**CSS Gradient Class Warning:**
+- Fixed: Tailwind CSS `bg-gradient-to-r` deprecation warning
+- Solution: Changed to `bg-linear-to-r` in MythologyWizard.tsx
+
+**THEMES Array Dependency Warning:**
+- Fixed: useCallback dependency warning for themes array
+- Solution: Moved to module-scope `THEMES` constant
+
+#### Files Created
+- `app/src/app/api/ai/name-suggestions/route.ts` - AI name generation endpoint
+
+#### Files Modified
+- `app/src/components/ai/MythologyWizard.tsx` - Real-time voice preview, THEMES constant, CSS fix
+- `app/src/components/ai/AIFieldHelper.tsx` - Real-time voice preview, AI name suggestions
+- `app/src/components/RichTextEditor.tsx` - Real-time voice preview
+- `app/src/app/student/mythology/[id]/character/create/page.tsx` - AIInputHelper props
+- `app/src/app/student/mythology/[id]/creature/create/page.tsx` - AIInputHelper props
+
+---
+
 ## December 29, 2025
 
 ### 🎴 Phase 4B-D Complete - Battle Images, Collectibles, Creative Exports

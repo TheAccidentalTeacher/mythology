@@ -10,6 +10,7 @@ import WantedPosterGenerator from '@/components/WantedPosterGenerator';
 import TradingCardGenerator from '@/components/TradingCardGenerator';
 import CharacterStatCard from '@/components/CharacterStatCard';
 import RealmPostcardGenerator from '@/components/RealmPostcardGenerator';
+import StandardsBadge from '@/components/StandardsBadge';
 
 interface Character {
   id: string;
@@ -335,6 +336,13 @@ export default function CharacterDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Floating Standards Badge */}
+      <StandardsBadge 
+        activityType="character-creation" 
+        activityName="Character Details"
+        position="bottom-right"
+      />
     </div>
   );
 }

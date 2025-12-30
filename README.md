@@ -1,8 +1,8 @@
 # 🏛️ The Mythology Codex - Project Documentation
 
-> **Status:** ✅ **Phases 0-3 Complete + Phase 4A-D (Image Generation + Collectibles + Creative Exports)** | **Oceanborn Legends Test Data: 87 Entities**  
-> **Last Updated:** December 29, 2025  
-> **Current State:** AI Image Generation with Trading Cards, Wanted Posters, Comic Strips, Prophecy Scrolls, Realm Postcards
+> **Status:** ✅ **Phases 0-4D Complete + Voice Input & AI Name Suggestions**  
+> **Last Updated:** December 30, 2025  
+> **Current State:** AI Image Generation, Trading Cards, Creative Exports, Real-Time Voice Input
 
 ---
 
@@ -330,6 +330,28 @@ After logging in:
   - Includes all geography choices in the prompt
   - Provides authentic naming patterns for each culture
   - Explains meaning and connection for each suggestion
+- **Real-Time Voice Input:** 🆕
+  - Students can speak instead of type in any text field
+  - Live transcription preview shows text as they speak
+  - Pulsing animation indicates active listening
+  - Powered by Web Speech API (Chrome/Edge support)
+  - Integrated in: Mythology Wizard, Story Editor, All Form Fields
+
+**AI-Powered Name Suggestions (Character/Creature Creation):** 🆕
+- **Contextual Name Generation:**
+  - Category pills (Storm-related, Fire-related, Moon/Night, etc.)
+  - AI generates 5 unique names based on mythology context
+  - Each name includes brief explanation of meaning
+  - Uses mythology's genre, geography, and cultural inspiration
+- **Smart Context Building:**
+  - Fetches Five Themes geography answers
+  - Considers existing name if user wants variations
+  - Different prompts for characters vs creatures
+- **User Experience:**
+  - Click category → AI generates suggestions
+  - Loading indicator per category
+  - Click any suggestion to use it
+  - Works on both character and creature creation pages
 
 **AI Image Generation (Phase 4A):** 🆕
 - **Math Quiz Token System:**
