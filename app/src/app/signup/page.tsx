@@ -129,22 +129,28 @@ function SignupForm() {
       classroomId = classroomData.id;
     }
 
-    // Update the profile with additional fields
+    // Update the profile with classroom_id using API route (bypasses RLS issues during signup)
     console.log('📝 Updating profile with classroom_id:', classroomId);
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        classroom_id: classroomId,
-        school_name: role === 'teacher' ? schoolName : null,
-        grade_level: role === 'teacher' ? gradeLevel : null,
-      })
-      .eq('id', authData.user.id);
+    const profileResponse = await fetch('/api/profiles/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: authData.user.id,
+        classroomId,
+        role,
+        displayName,
+        schoolName: role === 'teacher' ? schoolName : null,
+        gradeLevel: role === 'teacher' ? gradeLevel : null,
+      }),
+    });
 
-    if (profileError) {
-      console.error('⚠️ Profile update error:', profileError);
-      // Don't fail the signup if profile update fails
+    if (!profileResponse.ok) {
+      const errorData = await profileResponse.json();
+      console.error('⚠️ Profile update error:', errorData);
+      // Don't fail the signup, but log it
     } else {
-      console.log('✅ Profile updated successfully');
+      const profileData = await profileResponse.json();
+      console.log('✅ Profile updated successfully:', profileData);
     }
 
     // Redirect based on role
