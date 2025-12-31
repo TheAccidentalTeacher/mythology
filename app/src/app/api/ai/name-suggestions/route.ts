@@ -4,8 +4,8 @@
 // =====================================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { aiClient } from '@/lib/ai/aiClient';
-import { createClient } from '@/lib/supabase/client';
+import OpenAI from 'openai';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,6 +33,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for API key
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { success: false, error: 'OpenAI API key not configured' },
+        { status: 500 }
+      );
+    }
+
     // Use mythology context passed from client (they already have it loaded)
     const mythology = mythologyContext || {
       name: 'Your Mythology',
@@ -46,29 +55,49 @@ export async function POST(request: NextRequest) {
     // Build the prompt
     const prompt = buildNameSuggestionPrompt(mythology, category, entityType, existingName);
 
-    // Make AI request using the aiClient's request method
-    const result = await aiClient.request({
-      userId,
-      prompt,
-      requestType: 'brainstorm',
-      maxTokens: 500,
-      temperature: 0.8, // A bit creative for names
+    // Call OpenAI directly (like wizard route does)
+    const openai = new OpenAI({ apiKey });
+    const completion = await openai.chat.completions.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a creative mythology assistant helping middle school students name characters and creatures for their original mythologies. Be inspiring and educational while keeping names appropriate and memorable.'
+        },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 500,
+      temperature: 0.8,
     });
 
-    if (!result.success || !result.content) {
+    const content = completion.choices[0]?.message?.content;
+    if (!content) {
       return NextResponse.json(
-        { success: false, error: result.error || 'Failed to generate suggestions' },
+        { success: false, error: 'No response from AI' },
         { status: 500 }
       );
     }
 
     // Parse the response to extract names
-    const names = parseNameSuggestions(result.content);
+    const names = parseNameSuggestions(content);
+
+    // Log usage (optional, don't fail if it errors)
+    try {
+      const supabase = await createClient();
+      await supabase.from('ai_usage_log').insert({
+        user_id: userId,
+        request_type: 'name_suggestions',
+        mythology_id: mythologyId,
+        entity_type: entityType,
+      });
+    } catch (logError) {
+      console.error('Failed to log AI usage:', logError);
+    }
 
     return NextResponse.json({
       success: true,
       suggestions: names,
-      rawResponse: result.content,
+      rawResponse: content,
     });
   } catch (error) {
     console.error('Name suggestions error:', error);
