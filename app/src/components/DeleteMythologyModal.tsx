@@ -38,7 +38,11 @@ export default function DeleteMythologyModal({
   };
 
   const handleSecondConfirm = () => {
-    if (typedName.trim().toLowerCase() !== mythologyName.toLowerCase()) {
+    // Extract just the name part (before any ** or * characters from AI suggestions)
+    const cleanMythologyName = mythologyName.split('**')[0].trim();
+    const cleanTypedName = typedName.split('**')[0].trim();
+    
+    if (cleanTypedName.toLowerCase() !== cleanMythologyName.toLowerCase()) {
       setError('The name you typed does not match. Please try again.');
       return;
     }
@@ -125,11 +129,16 @@ export default function DeleteMythologyModal({
               <div className="text-6xl mb-4">✍️</div>
               <h2 className="text-2xl font-bold text-white mb-4">Type the Name to Confirm</h2>
               <p className="text-red-200 mb-2">
-                To make sure this isn't an accident, please type the exact name of your mythology:
+                To make sure this isn't an accident, please type the mythology name:
               </p>
-              <p className="text-2xl font-bold text-yellow-300 mb-4">
-                {mythologyName}
+              <p className="text-2xl font-bold text-yellow-300 mb-4 break-words max-w-full">
+                {mythologyName.split('**')[0].trim()}
               </p>
+              {mythologyName.includes('**') && (
+                <p className="text-red-300/70 text-sm italic mb-2">
+                  (Just type the name part before the ** symbols)
+                </p>
+              )}
             </div>
 
             <input
