@@ -38,12 +38,8 @@ export default function DeleteMythologyModal({
   };
 
   const handleSecondConfirm = () => {
-    // Extract just the name part (before any ** or * characters from AI suggestions)
-    const cleanMythologyName = mythologyName.split('**')[0].trim();
-    const cleanTypedName = typedName.split('**')[0].trim();
-    
-    if (cleanTypedName.toLowerCase() !== cleanMythologyName.toLowerCase()) {
-      setError('The name you typed does not match. Please try again.');
+    if (typedName.trim().toLowerCase() !== 'yes delete') {
+      setError('Please type exactly: yes delete');
       return;
     }
     setError(null);
@@ -122,23 +118,24 @@ export default function DeleteMythologyModal({
           </>
         )}
 
-        {/* Step 2: Type Name to Confirm */}
+        {/* Step 2: Type Confirmation Phrase */}
         {step === 'type-name' && (
           <>
             <div className="text-center mb-6">
               <div className="text-6xl mb-4">✍️</div>
-              <h2 className="text-2xl font-bold text-white mb-4">Type the Name to Confirm</h2>
-              <p className="text-red-200 mb-2">
-                To make sure this isn't an accident, please type the mythology name:
+              <h2 className="text-2xl font-bold text-white mb-4">Type to Confirm</h2>
+              <p className="text-red-200 mb-3">
+                You are about to permanently delete:
               </p>
-              <p className="text-2xl font-bold text-yellow-300 mb-4 break-words max-w-full">
+              <p className="text-2xl font-bold text-yellow-300 mb-4 break-words px-4">
                 {mythologyName.split('**')[0].trim()}
               </p>
-              {mythologyName.includes('**') && (
-                <p className="text-red-300/70 text-sm italic mb-2">
-                  (Just type the name part before the ** symbols)
-                </p>
-              )}
+              <p className="text-white text-lg mb-2">
+                To confirm, please type exactly:
+              </p>
+              <p className="text-3xl font-bold text-green-300 mb-4">
+                yes delete
+              </p>
             </div>
 
             <input
@@ -147,7 +144,7 @@ export default function DeleteMythologyModal({
               onChange={(e) => {
                 setTypedName(e.target.value);
                 setError(null);
-              }}
+              }}: yes delete
               placeholder="Type mythology name here..."
               className="w-full px-4 py-3 bg-white/10 border-2 border-red-500/50 rounded-xl text-white placeholder-white/40 text-lg text-center focus:outline-none focus:border-red-400 mb-4"
               autoFocus
