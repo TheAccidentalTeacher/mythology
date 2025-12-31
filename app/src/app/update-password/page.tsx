@@ -10,16 +10,33 @@ export default function UpdatePasswordPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    // Check if user came from password reset email
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    // Check for password recovery session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsRecoveryMode(true);
+        setError('');
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
-        console.log('Password recovery detected');
+        setIsRecoveryMode(true);
+        setError('');
       }
     });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,6 +97,12 @@ export default function UpdatePasswordPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {!isRecoveryMode && (
+            <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-3 rounded-lg">
+              Auth session missing! Please use the link from your password reset email.
+            </div>
+          )}
+          
           {error && (
             <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-3 rounded-lg">
               {error}
@@ -120,7 +143,7 @@ export default function UpdatePasswordPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !isRecoveryMode}
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Updating...' : 'Update Password'}
