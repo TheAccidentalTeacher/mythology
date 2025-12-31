@@ -5,17 +5,26 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { aiClient } from '@/lib/ai/aiClient';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/client';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { 
+      userId,
       mythologyId, 
       category, // e.g., "Storm-related", "Moon/Night", etc.
       entityType, // "character" or "creature"
       existingName, // optional - if they want to refine a name
+      mythologyContext, // passed from client
     } = body;
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'User ID required' },
+        { status: 400 }
+      );
+    }
 
     if (!mythologyId || !category) {
       return NextResponse.json(
@@ -24,47 +33,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user from session
-    const supabase = await createClient();
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !user) {
-      console.error('❌ Auth error:', userError);
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    console.log('✅ User authenticated:', user.id);
-
-    // Fetch mythology context
-    const { data: mythology, error: mythError } = await supabase
-      .from('mythologies')
-      .select('name, genre, geography_type, setting_description, cultural_inspiration, five_themes')
-      .eq('id', mythologyId)
-      .single();
-
-    console.log('🔍 Mythology query result:', { 
-      mythologyId, 
-      found: !!mythology, 
-      error: mythError?.message,
-      errorDetails: mythError 
-    });
-
-    if (mythError || !mythology) {
-      return NextResponse.json(
-        { success: false, error: 'Mythology not found' },
-        { status: 404 }
-      );
-    }
+    // Use mythology context passed from client (they already have it loaded)
+    const mythology = mythologyContext || {
+      name: 'Your Mythology',
+      genre: 'fantasy',
+      geography_type: 'varied',
+      setting_description: '',
+      cultural_inspiration: '',
+      five_themes: {}
+    };
 
     // Build the prompt
     const prompt = buildNameSuggestionPrompt(mythology, category, entityType, existingName);
 
     // Make AI request using the aiClient's request method
     const result = await aiClient.request({
-      userId: user.id,
+      userId,
       prompt,
       requestType: 'brainstorm',
       maxTokens: 500,

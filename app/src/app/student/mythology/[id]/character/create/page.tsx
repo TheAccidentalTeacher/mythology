@@ -15,6 +15,9 @@ export default function CreateCharacterPage() {
   const mythologyId = params.id as string;
   const supabase = createClient();
 
+  // User ID for AI requests
+  const [userId, setUserId] = useState<string | null>(null);
+
   // Mythology context for AI
   const [mythologyContext, setMythologyContext] = useState<{
     name: string;
@@ -40,6 +43,15 @@ export default function CreateCharacterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTips, setShowTips] = useState(true);
+
+  // Fetch user ID
+  useEffect(() => {
+    async function fetchUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
+    }
+    fetchUser();
+  }, [supabase]);
 
   // Fetch mythology info for context
   useEffect(() => {
@@ -175,6 +187,8 @@ export default function CreateCharacterPage() {
               required
               mythologyId={mythologyId}
               entityType="character"
+              userId={userId || undefined}
+              mythologyContext={mythologyContext || undefined}
             />
 
             {/* Character Type */}

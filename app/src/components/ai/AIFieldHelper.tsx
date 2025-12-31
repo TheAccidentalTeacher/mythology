@@ -550,6 +550,8 @@ interface AIInputHelperProps {
   type?: string;
   mythologyId?: string; // For AI-powered suggestions
   entityType?: 'character' | 'creature'; // What type of entity
+  userId?: string; // User ID for API
+  mythologyContext?: { name: string; category?: string; geography?: string }; // Mythology context
 }
 
 export function AIInputHelper({
@@ -561,6 +563,8 @@ export function AIInputHelper({
   type = 'text',
   mythologyId,
   entityType = 'character',
+  userId,
+  mythologyContext,
 }: AIInputHelperProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<NameSuggestion[]>([]);
@@ -590,10 +594,12 @@ export function AIInputHelper({
     setAiSuggestions([]);
 
     const requestBody = {
+      userId,
       mythologyId,
       category,
       entityType,
       existingName: value.trim() || undefined,
+      mythologyContext,
     };
 
     console.log('🎯 AI Name Suggestion Request:', {

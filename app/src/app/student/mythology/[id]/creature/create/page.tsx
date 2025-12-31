@@ -21,6 +21,9 @@ export default function CreateCreaturePage() {
     category?: string;
     geography?: string;
   } | null>(null);
+  
+  // User ID for AI requests
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -42,6 +45,17 @@ export default function CreateCreaturePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTips, setShowTips] = useState(true);
+
+  // Fetch user ID for AI requests
+  useEffect(() => {
+    async function fetchUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    }
+    fetchUser();
+  }, [supabase]);
 
   // Fetch mythology info for context
   useEffect(() => {
@@ -179,6 +193,8 @@ export default function CreateCreaturePage() {
               required
               mythologyId={mythologyId}
               entityType="creature"
+              userId={userId || undefined}
+              mythologyContext={mythologyContext || undefined}
             />
 
             {/* Grid for dropdowns */}
