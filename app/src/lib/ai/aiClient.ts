@@ -4,7 +4,7 @@
 // =====================================================
 
 import OpenAI from 'openai';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import { 
   SYSTEM_CONTEXT, 
   ASSISTANCE_LEVEL_MODIFIERS,
@@ -72,7 +72,7 @@ class AIClient {
   // =====================================================
 
   async checkUsage(userId: string): Promise<UsageCheckResult> {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get user's AI usage and any classroom settings
     const { data: profile, error: profileError } = await supabase
@@ -131,7 +131,7 @@ class AIClient {
     fieldContext?: FieldContext,
     tokenCount: number = 1
   ): Promise<void> {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Log to ai_usage_log
     await supabase.from('ai_usage_log').insert({
