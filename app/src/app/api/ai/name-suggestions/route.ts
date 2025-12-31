@@ -29,11 +29,14 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
+      console.error('❌ Auth error:', userError);
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
       );
     }
+
+    console.log('✅ User authenticated:', user.id);
 
     // Fetch mythology context
     const { data: mythology, error: mythError } = await supabase
@@ -42,9 +45,16 @@ export async function POST(request: NextRequest) {
       .eq('id', mythologyId)
       .single();
 
+    console.log('🔍 Mythology query result:', { 
+      mythologyId, 
+      found: !!mythology, 
+      error: mythError?.message,
+      errorDetails: mythError 
+    });
+
     if (mythError || !mythology) {
       return NextResponse.json(
-        { success: false, error: 'Mythology not found' },
+        { success: false, error: 'Mythology not found', debug: { mythologyId, userId: user.id, error: mythError?.message } },
         { status: 404 }
       );
     }
