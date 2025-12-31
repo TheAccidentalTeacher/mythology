@@ -89,13 +89,22 @@ export default function AssignmentsPage() {
               <p className="text-gray-300">Create curiosity-driven learning experiences</p>
             </div>
           </div>
-          <Link
-            href="/teacher/assignments/create"
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg font-semibold transition-all"
-          >
-            <Plus className="w-5 h-5" />
-            Create Assignment
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              href="/teacher/assignments/templates"
+              className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg font-semibold transition-all"
+            >
+              <BookOpen className="w-5 h-5" />
+              Browse Templates
+            </Link>
+            <Link
+              href="/teacher/assignments/create"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg font-semibold transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              Create Assignment
+            </Link>
+          </div>
         </div>
 
         {/* Info Banner */}

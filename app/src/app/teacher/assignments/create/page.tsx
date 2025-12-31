@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { ArrowLeft, Save, Eye, Sparkles, Target, BookOpen, Lightbulb, Users } from 'lucide-react';
@@ -22,12 +22,14 @@ const COLLABORATION_MODES = [
   { value: 'required', label: 'Required Collaboration', description: 'Must work together' },
 ];
 
-export default function CreateAssignmentPage() {
+function CreateAssignmentForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [classroom, setClassroom] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const templateId = searchParams?.get('templateId');
 
   // Form state
   const [title, setTitle] = useState('');
@@ -50,6 +52,54 @@ export default function CreateAssignmentPage() {
   useEffect(() => {
     loadClassroom();
   }, []);
+
+  useEffect(() => {
+    if (templateId && !loading) {
+      loadTemplate();
+    }
+  }, [templateId, loading]);
+
+  const loadTemplate = async () => {
+    try {
+      const { data: template, error } = await supabase
+        .from('assignment_templates')
+        .select('*')
+        .eq('id', templateId)
+        .single();
+
+      if (error || !template) {
+        alert('Failed to load template');
+        return;
+      }
+
+      // Populate form from template
+      setTitle(template.title);
+      setDescription(template.description || '');
+      setInstructions(template.instructions || '');
+      
+      if (template.template_data) {
+        const data = template.template_data;
+        setSubjectArea(data.subject_area || 'mythology');
+        setMinGrade(data.min_grade_level || 5);
+        setMaxGrade(data.max_grade_level || 8);
+        setPointsPossible(data.points_possible || 100);
+        setAiAccuracyCheck(data.ai_accuracy_check || false);
+        setAllowRevisions(data.allow_revisions !== false);
+        
+        if (data.scaffolding_hints && data.scaffolding_hints.length > 0) {
+          setScaffoldingHints(data.scaffolding_hints);
+        }
+        if (data.extension_challenges && data.extension_challenges.length > 0) {
+          setExtensionChallenges(data.extension_challenges);
+        }
+        if (data.learning_objectives && data.learning_objectives.length > 0) {
+          setLearningObjectives(data.learning_objectives);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading template:', error);
+    }
+  };
 
   const loadClassroom = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -545,5 +595,17 @@ export default function CreateAssignmentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CreateAssignmentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
+      </div>
+    }>
+      <CreateAssignmentForm />
+    </Suspense>
   );
 }
