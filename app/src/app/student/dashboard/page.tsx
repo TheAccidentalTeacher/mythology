@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Database } from '@/types/database.types';
 import StandardsBadge from '@/components/StandardsBadge';
+import DeleteMythologyModal from '@/components/DeleteMythologyModal';
 
 type Mythology = Database['public']['Tables']['mythologies']['Row'];
 
@@ -12,6 +13,11 @@ export default function StudentDashboard() {
   const [mythologies, setMythologies] = useState<Mythology[]>([]);
   const [profile, setProfile] = useState<{ display_name?: string; role?: string; level?: number; points?: number; current_streak?: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; mythologyId: string; mythologyName: string }>({
+    isOpen: false,
+    mythologyId: '',
+    mythologyName: '',
+  });
   const router = useRouter();
   const supabase = createClient();
 
@@ -204,47 +210,68 @@ export default function StudentDashboard() {
               {mythologies.map((myth) => (
                 <div
                   key={myth.id}
-                  className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-purple-400 transition-all cursor-pointer transform hover:scale-105"
-                  onClick={() => router.push(`/student/mythology/${myth.id}`)}
+                  className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-purple-400 transition-all group relative"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-xl font-bold text-white">{myth.name}</h3>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      myth.visibility === 'public' ? 'bg-green-500/20 text-green-300' :
-                      myth.visibility === 'teacher_only' ? 'bg-yellow-500/20 text-yellow-300' :
-                      'bg-gray-500/20 text-gray-300'
-                    }`}>
-                      {myth.visibility === 'public' ? '👁️ Public' :
-                       myth.visibility === 'teacher_only' ? '🔒 Teacher Only' :
-                       '✏️ Hidden'}
-                    </span>
-                  </div>
-                  
-                  <p className="text-gray-300 text-sm mb-4 line-clamp-3">
-                    {myth.description || 'No description yet'}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {myth.timeframe && (
-                      <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs">
-                        {myth.timeframe}
+                  {/* Delete button - positioned absolutely in top-right corner */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteModal({
+                        isOpen: true,
+                        mythologyId: myth.id,
+                        mythologyName: myth.name,
+                      });
+                    }}
+                    className="absolute top-4 right-4 z-10 p-2 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    title="Delete mythology"
+                  >
+                    🗑️
+                  </button>
+
+                  {/* Clickable card content */}
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/student/mythology/${myth.id}`)}
+                  >
+                    <div className="flex items-start justify-between mb-3 pr-8">
+                      <h3 className="text-xl font-bold text-white">{myth.name}</h3>
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        myth.visibility === 'public' ? 'bg-green-500/20 text-green-300' :
+                        myth.visibility === 'teacher_only' ? 'bg-yellow-500/20 text-yellow-300' :
+                        'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        {myth.visibility === 'public' ? '👁️ Public' :
+                         myth.visibility === 'teacher_only' ? '🔒 Teacher Only' :
+                         '✏️ Hidden'}
                       </span>
-                    )}
-                    {myth.genre && (
-                      <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">
-                        {myth.genre}
-                      </span>
-                    )}
-                    {myth.geography_type && (
-                      <span className="px-2 py-1 bg-green-500/20 text-green-300 rounded text-xs">
-                        {myth.geography_type}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm text-gray-400">
-                    <span>Created {new Date(myth.created_at).toLocaleDateString()}</span>
-                    <span>👁️ {myth.view_count} views</span>
+                    </div>
+                    
+                    <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                      {myth.description || 'No description yet'}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {myth.timeframe && (
+                        <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs">
+                          {myth.timeframe}
+                        </span>
+                      )}
+                      {myth.genre && (
+                        <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">
+                          {myth.genre}
+                        </span>
+                      )}
+                      {myth.geography_type && (
+                        <span className="px-2 py-1 bg-green-500/20 text-green-300 rounded text-xs">
+                          {myth.geography_type}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-400">
+                      <span>Created {new Date(myth.created_at).toLocaleDateString()}</span>
+                      <span>👁️ {myth.view_count} views</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -252,6 +279,30 @@ export default function StudentDashboard() {
           )}
         </div>
       </main>
+
+      {/* Delete Mythology Modal */}
+      <DeleteMythologyModal
+        mythologyId={deleteModal.mythologyId}
+        mythologyName={deleteModal.mythologyName}
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, mythologyId: '', mythologyName: '' })}
+        onSuccess={() => {
+          // Refresh mythologies list after successful deletion
+          const fetchData = async () => {
+            const supabaseClient = createClient();
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user) {
+              const { data: mythsData } = await supabaseClient
+                .from('mythologies')
+                .select('*')
+                .eq('created_by', user.id)
+                .order('created_at', { ascending: false });
+              setMythologies(mythsData || []);
+            }
+          };
+          fetchData();
+        }}
+      />
 
       {/* Floating Standards Badge */}
       <StandardsBadge 
