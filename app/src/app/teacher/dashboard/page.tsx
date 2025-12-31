@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import InviteStudentsModal from '@/components/InviteStudentsModal';
+import TeacherOnboarding from '@/components/TeacherOnboarding';
 
 interface Profile {
   id: string;
@@ -191,6 +192,15 @@ export default function TeacherDashboard() {
           <h2 className="text-2xl font-bold text-white mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <Link
+              href="/teacher/assignments"
+              className="p-6 bg-gradient-to-br from-green-500/20 to-blue-500/20 hover:from-green-500/30 hover:to-blue-500/30 border border-green-400/30 rounded-xl transition-all group"
+            >
+              <span className="text-3xl block mb-2">✍️</span>
+              <h3 className="text-white font-semibold mb-1">Assignments</h3>
+              <p className="text-gray-400 text-sm">Create curiosity-driven learning</p>
+            </Link>
+
+            <Link
               href="/teacher/mythologies"
               className="p-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-400/30 rounded-xl transition-all group"
             >
@@ -238,20 +248,55 @@ export default function TeacherDashboard() {
         </div>
 
         {/* More Features Coming */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-12 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">🚧 More Coming Soon 🚧</h2>
-          <p className="text-gray-300 text-lg mb-6">
-            The teacher dashboard is still being expanded! More features coming:
-          </p>
-          <ul className="text-gray-300 text-left max-w-2xl mx-auto space-y-2">
-            <li>✓ View and manage your students</li>
-            <li>✓ Review student mythologies</li>
-            <li>✓ Moderate flagged content</li>
-            <li>✓ View class analytics</li>
-            <li>✓ Impersonate students to see their view</li>
-          </ul>
+        <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-lg rounded-2xl border-2 border-green-400/30 p-8">
+          <div className="flex items-start gap-4">
+            <div className="text-5xl">🚀</div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-white mb-3">
+                Revolutionary Features Coming Soon
+              </h2>
+              <p className="text-gray-200 mb-4">
+                We're not just another assignment tracker. We're building something that actually makes learning FUN.
+              </p>
+              <div className="grid md:grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center gap-2 text-green-300">
+                  <span>✨</span>
+                  <span>Curiosity-driven assignments with multi-age differentiation</span>
+                </div>
+                <div className="flex items-center gap-2 text-blue-300">
+                  <span>🧬</span>
+                  <span>Convert mythology → science/civics lessons</span>
+                </div>
+                <div className="flex items-center gap-2 text-purple-300">
+                  <span>📝</span>
+                  <span>Narrative feedback system (not just arbitrary grades)</span>
+                </div>
+                <div className="flex items-center gap-2 text-pink-300">
+                  <span>🤖</span>
+                  <span>AI accuracy verification for science/history</span>
+                </div>
+                <div className="flex items-center gap-2 text-yellow-300">
+                  <span>🗽</span>
+                  <span>Constitutional foundation & American civics integration</span>
+                </div>
+                <div className="flex items-center gap-2 text-indigo-300">
+                  <span>👨‍👩‍👧</span>
+                  <span>Parent portal with collaborative feedback</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => localStorage.removeItem('hasSeenTeacherOnboarding')}
+                className="mt-4 text-sm text-gray-300 hover:text-white underline"
+              >
+                See the tour again
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Onboarding Tour */}
+      <TeacherOnboarding />
 
       {/* Invite Modal */}
       {showInviteModal && classroom && (
