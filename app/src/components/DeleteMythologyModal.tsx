@@ -144,8 +144,8 @@ export default function DeleteMythologyModal({
               onChange={(e) => {
                 setTypedName(e.target.value);
                 setError(null);
-              }}: yes delete
-              placeholder="Type mythology name here..."
+              }}
+              placeholder="Type: yes delete"
               className="w-full px-4 py-3 bg-white/10 border-2 border-red-500/50 rounded-xl text-white placeholder-white/40 text-lg text-center focus:outline-none focus:border-red-400 mb-4"
               autoFocus
             />
