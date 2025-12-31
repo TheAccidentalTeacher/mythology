@@ -168,6 +168,12 @@ export default function StudentDashboard() {
             + Create New Mythology
           </button>
           <button
+            onClick={() => router.push('/student/assignments')}
+            className="px-6 py-3 bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-lg transition-all transform hover:scale-105"
+          >
+            📚 My Assignments
+          </button>
+          <button
             onClick={() => router.push('/gallery')}
             className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg border border-white/30 transition-all"
           >
