@@ -21,11 +21,19 @@ interface Classroom {
   invite_code?: string;
 }
 
+interface Stats {
+  totalStudents: number;
+  totalMythologies: number;
+  pendingReviews: number;
+  flaggedContent: number;
+}
+
 export default function TeacherDashboard() {
   const router = useRouter();
   const supabase = createClient();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [classroom, setClassroom] = useState<Classroom | null>(null);
+  const [stats, setStats] = useState<Stats>({ totalStudents: 0, totalMythologies: 0, pendingReviews: 0, flaggedContent: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,21 +58,41 @@ export default function TeacherDashboard() {
 
       setProfile(profileData);
 
-      // Get classroom
-      if (profileData?.classroom_id) {
-        console.log('🏫 Looking for classroom:', profileData.classroom_id);
-        const { data: classroomData, error: classroomError } = await supabase
-          .from('classrooms')
-          .select('*')
-          .eq('id', profileData.classroom_id)
-          .single();
+      // Get classroom (teachers own classrooms via teacher_id, not classroom_id)
+      const { data: classroomData, error: classroomError } = await supabase
+        .from('classrooms')
+        .select('*')
+        .eq('teacher_id', user.id)
+        .single();
 
-        console.log('🏫 Classroom data:', classroomData);
-        console.log('❌ Classroom error:', classroomError);
+      console.log('🏫 Classroom data:', classroomData);
+      console.log('❌ Classroom error:', classroomError);
 
-        setClassroom(classroomData);
-      } else {
-        console.log('⚠️ No classroom_id in profile');
+      setClassroom(classroomData);
+
+      // Get stats if classroom exists
+      if (classroomData) {
+        // Count students
+        const { count: studentCount } = await supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('classroom_id', classroomData.id)
+          .eq('role', 'student');
+
+        // Count mythologies
+        const { count: mythCount } = await supabase
+          .from('mythologies')
+          .select('id', { count: 'exact', head: true })
+          .eq('classroom_id', classroomData.id);
+
+        // TODO: Count pending reviews and flagged content when those features are implemented
+
+        setStats({
+          totalStudents: studentCount || 0,
+          totalMythologies: mythCount || 0,
+          pendingReviews: 0,
+          flaggedContent: 0
+        });
       }
 
       setLoading(false);
@@ -131,19 +159,19 @@ export default function TeacherDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 p-6">
             <p className="text-gray-400 text-sm mb-2">Total Students</p>
-            <p className="text-white text-3xl font-bold">0</p>
+            <p className="text-white text-3xl font-bold">{stats.totalStudents}</p>
           </div>
           <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 p-6">
             <p className="text-gray-400 text-sm mb-2">Mythologies</p>
-            <p className="text-white text-3xl font-bold">0</p>
+            <p className="text-white text-3xl font-bold">{stats.totalMythologies}</p>
           </div>
           <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 p-6">
             <p className="text-gray-400 text-sm mb-2">Pending Reviews</p>
-            <p className="text-white text-3xl font-bold">0</p>
+            <p className="text-white text-3xl font-bold">{stats.pendingReviews}</p>
           </div>
           <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 p-6">
             <p className="text-gray-400 text-sm mb-2">Flagged Content</p>
-            <p className="text-white text-3xl font-bold">0</p>
+            <p className="text-white text-3xl font-bold">{stats.flaggedContent}</p>
           </div>
         </div>
 
