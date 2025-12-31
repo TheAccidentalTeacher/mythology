@@ -1966,6 +1966,168 @@ export function MythologyWizard({ isOpen, onClose, onComplete }: MythologyWizard
           </AnimatePresence>
         </div>
 
+        {/* Animated Progress Meter */}
+        <div className="px-6 py-4 border-t border-gray-800 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900">
+          {/* Progress Bar */}
+          <div className="relative mb-3">
+            {/* Background Track */}
+            <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
+              {/* Animated Fill */}
+              <motion.div
+                className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400 relative overflow-hidden"
+                initial={{ width: 0 }}
+                animate={{ 
+                  width: `${((currentStepIndex + 1) / stepOrder.length) * 100}%` 
+                }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 100, 
+                  damping: 20,
+                  duration: 0.8 
+                }}
+              >
+                {/* Shimmer Effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ 
+                    duration: 2, 
+                    repeat: Infinity, 
+                    ease: "linear" 
+                  }}
+                />
+              </motion.div>
+            </div>
+            
+            {/* Step Markers */}
+            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-between px-1">
+              {stepOrder.map((step, index) => {
+                const isCompleted = index < currentStepIndex;
+                const isCurrent = index === currentStepIndex;
+                const progress = (index / (stepOrder.length - 1)) * 100;
+                
+                return (
+                  <motion.div
+                    key={step}
+                    className="relative"
+                    style={{ left: `${progress}%`, transform: 'translateX(-50%)' }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    {/* Step Dot */}
+                    <motion.div
+                      className={`
+                        w-6 h-6 rounded-full flex items-center justify-center border-2 z-10 relative
+                        ${isCompleted 
+                          ? 'bg-green-500 border-green-400' 
+                          : isCurrent
+                            ? 'bg-amber-500 border-amber-300'
+                            : 'bg-gray-700 border-gray-600'
+                        }
+                      `}
+                      animate={isCurrent ? {
+                        scale: [1, 1.2, 1],
+                        boxShadow: [
+                          '0 0 0 0 rgba(251, 191, 36, 0.4)',
+                          '0 0 0 8px rgba(251, 191, 36, 0)',
+                          '0 0 0 0 rgba(251, 191, 36, 0)'
+                        ]
+                      } : {}}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      {isCompleted ? (
+                        <Check className="w-3 h-3 text-white" />
+                      ) : isCurrent ? (
+                        <Sparkles className="w-3 h-3 text-white" />
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-gray-500" />
+                      )}
+                    </motion.div>
+                    
+                    {/* Celebration particles when completing a step */}
+                    {isCompleted && (
+                      <motion.div
+                        className="absolute -top-4 left-1/2 -translate-x-1/2"
+                        initial={{ opacity: 1, y: 0, scale: 1 }}
+                        animate={{ 
+                          opacity: 0, 
+                          y: -20,
+                          scale: 0.5 
+                        }}
+                        transition={{ 
+                          duration: 1.5,
+                          delay: 0.3 
+                        }}
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-400" />
+                      </motion.div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Progress Text and Milestone Labels */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <motion.div
+                key={currentStepIndex}
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-amber-400 font-bold text-lg"
+              >
+                {Math.round(((currentStepIndex + 1) / stepOrder.length) * 100)}%
+              </motion.div>
+              <div className="text-gray-400 text-sm">
+                Complete
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <div className={`
+                px-3 py-1 rounded-full text-xs font-medium transition-all
+                ${currentStepIndex >= stepOrder.length - 1
+                  ? 'bg-green-500/20 text-green-400'
+                  : 'bg-amber-500/20 text-amber-400'
+                }
+              `}>
+                {stepIcons[currentStep as WizardStep]}
+                <span className="ml-2 capitalize hidden sm:inline">
+                  {(currentStep as string).replace('_', ' ')}
+                </span>
+              </div>
+              
+              {currentStepIndex < stepOrder.length - 1 && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="text-gray-500 text-xs hidden md:block"
+                >
+                  {stepOrder.length - currentStepIndex - 1} step{stepOrder.length - currentStepIndex - 1 !== 1 ? 's' : ''} remaining
+                </motion.div>
+              )}
+              
+              {currentStepIndex === stepOrder.length - 1 && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                  className="text-green-400 text-xs font-medium flex items-center gap-1"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Almost there!
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Footer Navigation */}
         {currentStep !== 'preview' && (
           <div className="flex items-center justify-between p-4 border-t border-gray-700 bg-gray-800/50">

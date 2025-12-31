@@ -3,9 +3,10 @@
 
 **Document Purpose:** This document provides comprehensive context for AI assistants helping with deployment, debugging, and future development. Read this FIRST before consulting other documentation.
 
-**Last Updated:** December 30, 2025  
+**Last Updated:** December 31, 2025  
 **Production Status:** Ready for deployment to Vercel  
-**Current Environment:** Development (localhost:3000)
+**Current Environment:** Development (localhost:3000)  
+**Recent Updates:** Assignment System, Parent View, Standards Tracking, Analytics, UX Enhancements
 
 ---
 
@@ -22,6 +23,16 @@ Students create:
 - **Interactive world maps** with sacred locations
 - **Relationship networks** showing how characters connect
 - **AI-generated artwork** for their creations
+
+Teachers assign:
+- **Curiosity-driven assignments** with multi-age differentiation
+- **Narrative feedback** focused on growth, not just grades
+- **Standards-aligned learning** with mastery tracking
+
+Parents collaborate:
+- **View children's work** with transparency into AI use
+- **Provide feedback** as co-educators in homeschool model
+- **Track progress** through standards mastery dashboard
 
 ### Why This Exists
 
@@ -539,6 +550,231 @@ npx tsc --noEmit
 - Daily cron job resets streaks (set up in Vercel)
 - Leaderboard queries can be slow with 1000+ users (add indexing)
 
+### 10. Assignment System (Phase 4E) 🆕
+
+**What It Does:** Complete assignment CRUD with multi-age differentiation and narrative feedback
+
+**Why It Matters:**
+- **Homeschool Focus** - Multi-age classrooms need differentiated assignments
+- **Growth Mindset** - Unlimited revisions, narrative feedback over grades
+- **Parent Collaboration** - Parents view work and provide feedback
+- **Standards Tracking** - Maps to CCSS and Alaska standards
+- **Revolutionary Teaching** - Moves beyond traditional grading
+
+**Technical Notes:**
+- **Database Tables:**
+  - `assignments` - Assignment metadata with differentiation
+  - `assignment_submissions` - Student work with narrative feedback
+  - `submission_history` - Revision tracking
+  - `assignment_templates` - Pre-built templates (5 created)
+
+- **Assignment Features:**
+  - Multi-age targeting (min_grade_level, max_grade_level)
+  - Difficulty levels JSONB (beginner, intermediate, advanced)
+  - Scaffolding hints array for struggling students
+  - Extension challenges array for gifted students
+  - Standards array (CCSS.ELA-LITERACY.W.6.3, etc.)
+  - AI feedback toggle (teacher reviews before releasing)
+  - AI accuracy checking for science/history
+
+- **Grading Philosophy:**
+  - Narrative feedback focus (strengths, growth areas, next steps)
+  - Grade released flag (teacher controls visibility)
+  - Parent feedback field (collaborative learning)
+  - Unlimited revisions (allow_revisions default: true)
+  - Revision number tracking with history snapshots
+  - Status workflow: not_started → in_progress → submitted → needs_revision → graded → released
+
+- **Template System:**
+  - 5 pre-built templates (mythology_basics, science, civics, math, ela)
+  - Filter by category and difficulty
+  - "Use This Template" button auto-fills creation form
+  - Grade level range indicators
+
+- **Student View:**
+  - Assignment dashboard with status badges
+  - Submit mythology link or text
+  - View narrative feedback (only after teacher releases)
+  - Revise and resubmit unlimited times
+
+**Deployment Considerations:**
+- Migration: `014_assignments.sql`
+- RLS policies for teacher/student/parent access
+- Parent RLS uses classroom_id to find children
+- AI feedback requires OpenAI API key
+- Template seeding happens in migration
+
+### 11. Parent View (Phase 4F) 🆕
+
+**What It Does:** Parent dashboard showing all children's work with feedback capability
+
+**Why It Matters:**
+- **Homeschool Collaboration** - Parents as co-educators, not surveillance
+- **Transparency** - Parents see exactly what their child is learning
+- **Involvement** - Parents can add feedback to support learning
+- **Trust** - Shows responsible AI use and educational rigor
+
+**Technical Notes:**
+- **Routes:**
+  - `/parent/dashboard` - View all children with stats
+  - `/parent/child/[childId]/assignments` - Child's assignment list
+  - `/parent/child/[childId]/assignment/[assignmentId]` - View work & add feedback
+
+- **Features:**
+  - Multi-student support (shows all children in household)
+  - Quick stats: assignments, completion rate, average score
+  - View child's submission (mythology link or text)
+  - Read teacher feedback (narrative, strengths, growth areas)
+  - See grade (only if teacher released it)
+  - Add parent feedback in dedicated field (parent_feedback column)
+
+- **Access Control:**
+  - Parents can only see children in same classroom
+  - RLS policy checks classroom_id
+  - Parent can update parent_feedback but not grade/teacher feedback
+  - Parent cannot see AI suggestions (teacher-only)
+
+**Deployment Considerations:**
+- Uses existing `assignment_submissions` table
+- No new migrations needed
+- Parent role already exists in profiles
+- Encourages family discussion about learning
+
+### 12. Standards Tracking (Phase 4G) 🆕
+
+**What It Does:** Student-facing mastery dashboard aggregating standards from all assignments
+
+**Why It Matters:**
+- **Standards Without Obsession** - Growth over grades mentality
+- **Self-Awareness** - Students see their own progress
+- **Support Identification** - Helps identify areas needing practice
+- **Accountability** - Shows educational value of mythology creation
+
+**Technical Notes:**
+- **Route:** `/teacher/standards` (also accessible to students for own data)
+
+- **Data Source:**
+  - Aggregates `standards_mastery` JSONB from `assignment_submissions`
+  - Format: `{standard_code: mastery_percentage}`
+  - Example: `{"CCSS.ELA-LITERACY.W.6.3": 87}`
+
+- **Mastery Levels:**
+  - 🟢 Mastered (90-100%) - Green
+  - 🔵 Proficient (75-89%) - Blue
+  - 🟡 Developing (60-74%) - Yellow
+  - 🔴 Beginning (<60%) - Red
+
+- **Features:**
+  - Filter by category (ELA, Math, Science, Social Studies, Other)
+  - Category auto-detected from standard code prefix
+  - Progress bars showing percentage
+  - Assignment count per standard (how many times practiced)
+  - Expandable cards showing standard code and description
+
+- **Standard Format:**
+  - Supports CCSS: `CCSS.ELA-LITERACY.W.6.3`
+  - Supports Alaska: `AK.SS.5.THEME.2`
+  - Graceful handling of custom standards
+
+**Deployment Considerations:**
+- Uses existing `assignment_submissions.standards_mastery` field
+- Teacher sets mastery level when grading
+- No additional API calls or costs
+- Client-side aggregation and filtering
+
+### 13. Analytics Dashboard (Phase 4G) 🆕
+
+**What It Does:** Teacher analytics with metrics, activity feed, and automated insights
+
+**Why It Matters:**
+- **Data-Driven Teaching** - Identify trends and patterns
+- **Early Intervention** - Spot students needing support
+- **Reflection** - Encourage positive teaching practices
+- **Growth Mindset** - Focus on progress, not judgment
+
+**Technical Notes:**
+- **Route:** `/teacher/analytics`
+
+- **Metrics Displayed:**
+  - Total assignments created
+  - Completion rate percentage (submitted/total)
+  - Average score across all graded work
+  - Revision rate (percentage of work revised)
+  - Students with work vs total student count
+  - Total submissions vs graded submissions
+
+- **Recent Activity Feed:**
+  - Last 10 assignment submissions
+  - Shows: student name, assignment title, date, status
+  - Status badges: submitted, needs_revision, graded, released
+  - Click to navigate to submission
+
+- **Automated Insights:**
+  - AI-generated observations based on data patterns
+  - Examples:
+    - "Students revising 40% of work - excellent growth mindset!"
+    - "Assignment X has only 25% completion"
+    - "3 students ready for feedback on recent work"
+    - "Class averaging 87% on narrative writing standards!"
+    - "5 students haven't submitted in 7+ days"
+  
+- **Philosophy:**
+  - Analytics support reflection, not judgment
+  - No punitive metrics (no "failing student" counts)
+  - Insights praise positive behaviors
+  - Data helps identify support needs
+
+**Deployment Considerations:**
+- Queries `assignments` and `assignment_submissions` tables
+- Client-side calculation of metrics
+- Insights are hardcoded rules (not AI-generated yet)
+- Future: Could integrate GPT-4 for dynamic insights
+
+### 14. UX Enhancements - Animated Progress Meter (Phase 4H) 🆕
+
+**What It Does:** Visual progress bar in Mythology Wizard showing journey through 5 steps
+
+**Why It Matters:**
+- **User Feedback** - Real user (Anna Somers) found wizard overwhelming without progress indicator
+- **Psychological** - Visual progress makes multi-step process feel achievable
+- **Engagement** - Fun animations keep students motivated
+- **Clarity** - Always know "where am I" in the journey
+
+**Technical Notes:**
+- **Location:** Bottom of `MythologyWizard.tsx` modal
+
+- **Visual Elements:**
+  - Progress bar filling left-to-right (0% → 20% → 40% → 60% → 80% → 100%)
+  - Shimmer effect flowing across filled portion
+  - Step markers positioned along bar:
+    - ✅ Green checkmarks for completed steps
+    - ⭐ Sparkles for current step (pulsing glow)
+    - Gray dots for future steps
+  - Large percentage display (animated counting)
+  - Current step badge with icon and name
+  - "X steps remaining" counter
+  - "Almost there!" celebration on final step
+
+- **Animations:**
+  - Spring physics for smooth bar filling (Framer Motion)
+  - Pulsing glow on current step marker
+  - Celebration particles float up when completing steps
+  - Shimmer continuously flows (2s loop)
+
+- **5 Steps Tracked:**
+  1. Category - Choose mythology type
+  2. Geography - Define physical world
+  3. Five Themes - Geography interview
+  4. Name - Name your mythology
+  5. Preview - Final review
+
+**Deployment Considerations:**
+- Uses Framer Motion (already imported)
+- No additional dependencies
+- Purely client-side animation
+- Addresses user feedback from dogfooding session
+- Makes 5-step process feel like achievable journey
+
 ---
 
 ## 🎓 EDUCATIONAL PHILOSOPHY & VALUE
@@ -984,23 +1220,32 @@ If the conversation resets:
 
 ## 🌟 THE VISION: WHERE WE'RE GOING
 
-### Current State (December 30, 2025)
+### Current State (December 31, 2025)
 
-**Implemented (96%):**
+**Implemented (98%):**
 - ✅ Core mythology creation
 - ✅ Characters, creatures, stories, maps
 - ✅ AI assistance (name suggestions, help buttons, voice input)
-- ✅ Image generation (math quiz, trading cards)
+- ✅ Image generation (math quiz, trading cards, creative exports)
 - ✅ Battles and crossovers
 - ✅ Gamification (points, badges, levels)
 - ✅ Teacher tools (classroom management, moderation)
+- ✅ Assignment system (CRUD, differentiation, templates, narrative feedback)
+- ✅ Parent view (collaborative feedback, transparency)
+- ✅ Standards tracking (mastery dashboard)
+- ✅ Analytics dashboard (metrics, insights, activity feed)
+- ✅ UX enhancements (animated progress meter)
 
 **Ready for Production:**
 - All features stable
-- Documentation complete
+- Documentation complete and updated
 - Test data exists (Oceanborn Legends - 87 entities)
 - 115 test student accounts
 - Security measures in place
+- Assignment system tested and working
+- Parent view enables homeschool collaboration
+- Standards tracking without obsession
+- Analytics support reflection, not judgment
 
 ### Near-Term Goals (Next 3 Months)
 

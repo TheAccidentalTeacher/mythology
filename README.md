@@ -1,8 +1,8 @@
 # 🏛️ The Mythology Codex - Project Documentation
 
-> **Status:** ✅ **Phases 0-4D Complete + Voice Input & AI Name Suggestions**  
-> **Last Updated:** December 30, 2025  
-> **Current State:** AI Image Generation, Trading Cards, Creative Exports, Real-Time Voice Input
+> **Status:** ✅ **Phases 0-4D Complete + Assignment System & UX Enhancements**  
+> **Last Updated:** December 31, 2025  
+> **Current State:** AI Image Generation, Assignment System, Parent View, Standards Tracking, Analytics, Animated Progress Meter
 
 ---
 
@@ -120,7 +120,10 @@ After logging in:
 | **Phase 4B** | Battle Integration | ✅ COMPLETE | 100% |
 | **Phase 4C** | Trading Cards & Collectibles | ✅ COMPLETE | 100% |
 | **Phase 4D** | Creative Exports (Comics, Scrolls, Postcards, Posters) | ✅ COMPLETE | 100% |
-| **Phase 4E** | Community Features (Murals, Sharing) | ⏸️ PENDING | 0% |
+| **Phase 4E** | Assignment System (Full CRUD, Grading, Templates) | ✅ COMPLETE | 100% |
+| **Phase 4F** | Parent View & Collaborative Feedback | ✅ COMPLETE | 100% |
+| **Phase 4G** | Standards Tracking & Analytics Dashboard | ✅ COMPLETE | 100% |
+| **Phase 4H** | UX Enhancements (Animated Progress Meter) | ✅ COMPLETE | 100% |
 | **Phase 5** | Real-time Collaboration | ⏸️ PENDING | 0% |
 | **Phase 6** | Presentations | ⏸️ PENDING | 0% |
 | **Phase 7** | Polish & Launch | ⏸️ PENDING | 0% |
@@ -444,6 +447,147 @@ After logging in:
   - Perfect for villains and dangerous creatures
   - Professional Western poster aesthetic
 
+**Assignment System (Phase 4E):** 🆕
+- **Complete Assignment CRUD:**
+  - Create assignments with rich instructions
+  - Title, description, detailed instructions field
+  - Due dates, availability windows (available_from, available_until)
+  - Points possible (default: 100)
+  - Subject area selection (mythology, science, history, civics, math, ela)
+  - Submission types: mythology, text, file, link
+  - Collaborative mode: required, optional, individual_only
+- **Multi-Age Differentiation (CRITICAL for homeschool):**
+  - Min/max grade level targeting (e.g., 3-8)
+  - Difficulty levels (beginner, intermediate, advanced) with JSONB storage
+  - Scaffolding hints array for struggling students
+  - Extension challenges array for gifted students
+- **Standards Integration:**
+  - Standards array (CCSS.ELA-LITERACY.W.6.3, etc.)
+  - Learning objectives tracking
+  - Cross-curricular connections
+- **AI Features:**
+  - AI feedback enabled toggle (gentle first-pass suggestions)
+  - AI accuracy checking for science/history assignments
+  - Teacher must review AI suggestions before releasing to students
+- **Grading Philosophy:**
+  - Narrative feedback focus (not just numbers)
+  - Strength comments (what student did well)
+  - Growth comments (areas for improvement)
+  - Next steps (specific revision suggestions)
+  - Parent feedback field (collaborative homeschool model)
+  - Grade released flag (teacher controls when students see scores)
+- **Unlimited Revisions:**
+  - Allow revisions toggle (default: true - growth mindset)
+  - Max revisions setting (NULL = unlimited)
+  - Revision number tracking
+  - Submission history with snapshots
+  - Status workflow: not_started → in_progress → submitted → needs_revision → graded → released
+- **Template System:**
+  - Browse 5 pre-built assignment templates
+  - Categories: mythology_basics, science, civics, math, ela
+  - Filter by category and difficulty
+  - Grade level range indicators (elementary, middle, high, multi-age)
+  - "Use This Template" button auto-fills creation form
+  - Templates include scaffolding and extension challenges
+- **Classroom Integration:**
+  - Published/draft status
+  - Late submission controls (default: allowed with 0% penalty)
+  - Classroom-specific assignment lists
+  - Student assignment dashboard with status badges
+
+**Parent View (Phase 4F):** 🆕
+- **Parent Dashboard:**
+  - View all children in household (multi-student support)
+  - Quick stats per child: assignments, completion rate, average score
+  - Navigation to individual child's work
+- **Child Assignment View:**
+  - See all assignments for selected child
+  - Status indicators (not started, in progress, submitted, graded)
+  - Due dates and points possible
+  - Click to view detailed work
+- **Work Detail View:**
+  - View child's submission (mythology link or text content)
+  - Read teacher feedback (narrative, strengths, growth areas, next steps)
+  - See grade (only if teacher has released it)
+  - Add parent feedback in dedicated field
+  - Encourage parent involvement in learning process
+- **Homeschool Collaboration Philosophy:**
+  - Parents as co-educators, not surveillance
+  - Feedback section separate from teacher feedback
+  - Encourages family discussion about learning
+  - Transparency builds trust in educational process
+
+**Standards Tracking (Phase 4G):** 🆕
+- **Student Mastery Dashboard:**
+  - View all standards student has encountered
+  - Aggregates standards_mastery from all submissions
+  - Mastery levels with color coding:
+    - 🟢 Mastered (90-100%) - Green
+    - 🔵 Proficient (75-89%) - Blue
+    - 🟡 Developing (60-74%) - Yellow
+    - 🔴 Beginning (<60%) - Red
+  - Progress bars showing percentage mastered
+  - Assignment count per standard (how many times practiced)
+- **Filtering & Organization:**
+  - Filter by category (ELA, Math, Science, Social Studies, Other)
+  - Sort by mastery level
+  - Expandable standard cards showing code and description
+- **Standards Format:**
+  - Supports CCSS format (CCSS.ELA-LITERACY.W.6.3)
+  - Category auto-detected from code prefix
+  - Graceful handling of custom/unknown standards
+- **Philosophy:**
+  - Standards tracking without obsession
+  - Growth over grades mentality
+  - Students see own progress, not compared to others
+  - Helps identify areas needing support
+
+**Analytics Dashboard (Phase 4G):** 🆕
+- **Teacher Analytics Page:**
+  - Key metrics in card grid:
+    - Total assignments created
+    - Completion rate percentage
+    - Average score across all graded work
+    - Revision rate (how often students revise)
+    - Students with work vs total student count
+    - Total submissions and graded submissions
+  - Visual metric cards with icons and colors
+- **Recent Activity Feed:**
+  - Last 10 assignment submissions
+  - Student name, assignment title, submission date
+  - Status badge (submitted, needs revision, graded, released)
+  - Quick navigation to review work
+- **Automated Insights:**
+  - AI-generated observations based on data patterns
+  - Growth mindset praise ("Students revising 40% of work - excellent growth mindset!")
+  - Low completion warnings ("Assignment X has only 25% completion")
+  - Revision encouragement ("3 students ready for feedback on recent work")
+  - High mastery celebration ("Class averaging 87% on narrative writing standards!")
+  - Engagement alerts ("5 students haven't submitted in 7+ days")
+- **Philosophy:**
+  - Analytics support reflection, not judgment
+  - Insights encourage positive teaching practices
+  - Data helps identify students needing support
+  - No punitive metrics (no "failing student" counts)
+
+**UX Enhancements (Phase 4H):** 🆕
+- **Animated Progress Meter (Mythology Wizard):**
+  - Visual progress bar at bottom of wizard modal
+  - Smooth filling animation (0% → 20% → 40% → 60% → 80% → 100%)
+  - Step markers positioned along bar:
+    - ✅ Green checkmarks for completed steps
+    - ⭐ Sparkles for current step (pulsing glow animation)
+    - Gray dots for future steps
+  - Shimmer effect flows across filled portion
+  - Large percentage display with animated counting
+  - Current step badge with icon and name
+  - "X steps remaining" counter
+  - "Almost there!" celebration message on final step
+  - Spring physics for natural movement
+  - Celebration particles float up when completing steps
+  - Addresses user feedback: Anna Somers found wizard overwhelming without progress indicator
+  - Makes 5-step process feel achievable instead of endless
+
 #### ✅ **Gallery & Discovery**
 - Public mythology gallery
 - Search and filter functionality
@@ -462,7 +606,7 @@ After logging in:
 
 ## 🗄️ DATABASE SCHEMA
 
-### **Implemented Tables (21 total)**
+### **Implemented Tables (25 total)**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -496,6 +640,12 @@ After logging in:
 │ ├── generated_images     - AI-generated images with metadata        │
 │ ├── classroom_image_settings - Teacher controls for image gen       │
 │ └── moderation_log       - Image moderation tracking                │
+├─────────────────────────────────────────────────────────────────────┤
+│ ASSIGNMENT TABLES (014_assignments.sql) 🆕                           │
+│ ├── assignments          - Assignment CRUD with differentiation      │
+│ ├── assignment_submissions - Student work with narrative feedback   │
+│ ├── submission_history   - Revision tracking with snapshots         │
+│ └── assignment_templates - Pre-built curiosity-driven assignments   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -512,6 +662,7 @@ After logging in:
 | `007_battle_stories.sql` | battle_stories | Saved battle narrations |
 | `008_crossover_events.sql` | crossover_requests, mythology_alliances, crossover_stories, crossover_battles, teacher_events, event_participants | Cross-mythology interactions |
 | `011_image_generation.sql` | quiz_attempts, generated_images, classroom_image_settings, moderation_log + profile columns | 🆕 AI Image Generation system |
+| `014_assignments.sql` | assignments, assignment_submissions, submission_history, assignment_templates | 🆕 Assignment system with differentiation & narrative feedback |
 
 ### **Key Schema Features**
 - UUID primary keys with auto-generation
@@ -594,8 +745,39 @@ app/
 │   │   │   ├── dashboard/
 │   │   │   │   └── page.tsx      # Teacher dashboard with stats
 │   │   │   │
-│   │   │   └── students/
-│   │   │       └── page.tsx      # Student management
+│   │   │   ├── students/
+│   │   │   │   └── page.tsx      # Student management
+│   │   │   │
+│   │   │   ├── assignments/
+│   │   │   │   ├── page.tsx      # Assignment list & management
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx  # Assignment creation form
+│   │   │   │   ├── templates/
+│   │   │   │   │   └── page.tsx  # Browse assignment templates 🆕
+│   │   │   │   └── [assignmentId]/
+│   │   │   │       ├── page.tsx  # Assignment detail & submissions
+│   │   │   │       └── submissions/
+│   │   │   │           └── [submissionId]/
+│   │   │   │               └── page.tsx  # Grade & provide feedback
+│   │   │   │
+│   │   │   ├── standards/
+│   │   │   │   └── page.tsx      # Standards mastery dashboard 🆕
+│   │   │   │
+│   │   │   └── analytics/
+│   │   │       └── page.tsx      # Teacher analytics & insights 🆕
+│   │   │
+│   │   ├── parent/
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx      # Parent dashboard - all children 🆕
+│   │   │   │
+│   │   │   └── child/
+│   │   │       └── [childId]/
+│   │   │           ├── assignments/
+│   │   │           │   └── page.tsx      # Child's assignment list 🆕
+│   │   │           │
+│   │   │           └── assignment/
+│   │   │               └── [assignmentId]/
+│   │   │                   └── page.tsx  # View work & add feedback 🆕
 │   │   │
 │   │   └── api/
 │   │       ├── classrooms/
