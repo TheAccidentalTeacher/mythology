@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Target, BookOpen, AlertTriangle, CheckCircle, ThumbsUp, TrendingUp, Lightbulb, Send, Save } from 'lucide-react';
+import { ArrowLeft, Calendar, Target, BookOpen, AlertTriangle, CheckCircle, ThumbsUp, TrendingUp, Lightbulb, Send, Save, Sparkles } from 'lucide-react';
 
 interface Assignment {
   id: string;
@@ -53,6 +53,8 @@ export default function StudentAssignmentDetailPage() {
   const [mythologies, setMythologies] = useState<any[]>([]);
   const [showHints, setShowHints] = useState(false);
   const [showChallenges, setShowChallenges] = useState(false);
+  const [gettingAIFeedback, setGettingAIFeedback] = useState(false);
+  const [aiFeedback, setAiFeedback] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -207,6 +209,32 @@ export default function StudentAssignmentDetailPage() {
     }
   }
 
+  async function handleGetAIFeedback() {
+    if (!workContent.trim()) {
+      alert('Please write something first!');
+      return;
+    }
+
+    setGettingAIFeedback(true);
+    try {
+      const response = await fetch('/api/ai/writing-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: workContent })
+      });
+
+      if (!response.ok) throw new Error('Failed to get feedback');
+
+      const feedback = await response.json();
+      setAiFeedback(feedback);
+    } catch (error) {
+      console.error('Error getting AI feedback:', error);
+      alert('Failed to get AI feedback. Please try again.');
+    } finally {
+      setGettingAIFeedback(false);
+    }
+  }
+
   if (loading || !assignment) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
@@ -221,6 +249,56 @@ export default function StudentAssignmentDetailPage() {
   const isSubmitted = submission?.status === 'submitted';
   const hasGrade = submission?.grade_released;
   const canRevise = assignment.allow_revisions && hasGrade;
+
+  async function handleStartRevision() {
+    if (!confirm('Ready to submit a revision? Your previous work will be saved in history.')) {
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      if (!submission) return;
+
+      // Save current submission to history
+      const { error: historyError } = await supabase
+        .from('submission_history')
+        .insert([{
+          submission_id: submission.id,
+          revision_number: submission.revision_number,
+          content_snapshot: submission.submission_content,
+          submitted_at: submission.submitted_at,
+          feedback_at_time: submission.narrative_feedback
+        }]);
+
+      if (historyError) throw historyError;
+
+      // Update submission for new revision
+      const { error: updateError } = await supabase
+        .from('assignment_submissions')
+        .update({
+          status: 'in_progress',
+          revision_number: submission.revision_number + 1,
+          grade_released: false,
+          submitted_at: null,
+          // Keep the old content so student can improve it
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', submission.id);
+
+      if (updateError) throw updateError;
+
+      alert('Revision started! You can now improve your work based on the feedback.');
+      await loadData();
+    } catch (error) {
+      console.error('Error starting revision:', error);
+      alert('Failed to start revision. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -341,6 +419,14 @@ export default function StudentAssignmentDetailPage() {
                 {!isSubmitted && (
                   <div className="mt-4 flex gap-3">
                     <button
+                      onClick={handleGetAIFeedback}
+                      disabled={gettingAIFeedback || !workContent.trim()}
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 text-purple-300 rounded-lg transition-all disabled:opacity-50"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      {gettingAIFeedback ? 'Checking...' : 'Get Writing Help'}
+                    </button>
+                    <button
                       onClick={handleSaveDraft}
                       disabled={submitting}
                       className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg transition-all disabled:opacity-50"
@@ -365,6 +451,56 @@ export default function StudentAssignmentDetailPage() {
                     Submitted! Your teacher will review this soon.
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* AI Writing Feedback */}
+            {aiFeedback && !isSubmitted && (
+              <div className="bg-purple-500/10 backdrop-blur-lg rounded-xl border border-purple-400/30 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-xl font-semibold text-purple-300">AI Writing Help</h3>
+                </div>
+
+                {aiFeedback.strengths && aiFeedback.strengths.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-green-300 font-semibold mb-2">✨ What's Working Well:</h4>
+                    <ul className="space-y-1">
+                      {aiFeedback.strengths.map((strength: string, index: number) => (
+                        <li key={index} className="text-gray-300 text-sm">
+                          <span className="text-green-400">•</span> {strength}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {aiFeedback.suggestions && aiFeedback.suggestions.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-blue-300 font-semibold mb-2">💡 Suggestions to Consider:</h4>
+                    <ul className="space-y-2">
+                      {aiFeedback.suggestions.map((item: any, index: number) => (
+                        <li key={index} className="text-gray-300 text-sm">
+                          <div className="font-medium text-blue-300">{item.issue}</div>
+                          <div className="text-gray-400 text-xs mt-1">{item.suggestion}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {aiFeedback.encouragement && (
+                  <div className="bg-purple-500/20 rounded-lg p-4 border border-purple-400/30">
+                    <p className="text-purple-200 text-sm italic">{aiFeedback.encouragement}</p>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setAiFeedback(null)}
+                  className="mt-4 text-sm text-gray-400 hover:text-gray-300"
+                >
+                  Dismiss
+                </button>
               </div>
             )}
 
@@ -437,16 +573,13 @@ export default function StudentAssignmentDetailPage() {
                 {canRevise && (
                   <div className="bg-yellow-500/10 backdrop-blur-lg rounded-xl border border-yellow-400/30 p-6">
                     <p className="text-yellow-300 mb-4">
-                      Want to improve your work? You can revise and resubmit!
+                      Want to improve your work? You can revise and resubmit based on your teacher's feedback!
                     </p>
                     <button
-                      onClick={() => {
-                        // TODO: Implement revision workflow
-                        alert('Revision feature coming soon! You\'ll be able to improve your work based on feedback.');
-                      }}
+                      onClick={handleStartRevision}
                       className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-yellow-500/50 transition-all"
                     >
-                      Submit a Revision
+                      Start a Revision
                     </button>
                   </div>
                 )}
