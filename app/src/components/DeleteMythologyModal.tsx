@@ -51,21 +51,30 @@ export default function DeleteMythologyModal({
     setError(null);
 
     try {
+      console.log('🗑️ Attempting to delete mythology:', mythologyId);
+      
       const response = await fetch(`/api/mythology/${mythologyId}`, {
         method: 'DELETE',
       });
 
+      console.log('🗑️ Delete response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ Delete failed:', errorData);
         throw new Error(errorData.error || 'Failed to delete mythology');
       }
+
+      const result = await response.json();
+      console.log('✅ Delete successful:', result);
 
       // Success!
       onSuccess();
       handleClose();
     } catch (err) {
-      console.error('Delete error:', err);
+      console.error('❌ Delete error:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete mythology');
+      // DON'T close modal on error - user needs to see the error
     } finally {
       setIsDeleting(false);
     }

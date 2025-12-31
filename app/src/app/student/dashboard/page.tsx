@@ -286,21 +286,22 @@ export default function StudentDashboard() {
         mythologyName={deleteModal.mythologyName}
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, mythologyId: '', mythologyName: '' })}
-        onSuccess={() => {
+        onSuccess={async () => {
+          console.log('🔄 Refreshing mythologies list after deletion...');
           // Refresh mythologies list after successful deletion
-          const fetchData = async () => {
-            const supabaseClient = createClient();
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (user) {
-              const { data: mythsData } = await supabaseClient
-                .from('mythologies')
-                .select('*')
-                .eq('created_by', user.id)
-                .order('created_at', { ascending: false });
-              setMythologies(mythsData || []);
-            }
-          };
-          fetchData();
+          const supabaseClient = createClient();
+          const { data: { user } } = await supabaseClient.auth.getUser();
+          if (user) {
+            const { data: mythsData } = await supabaseClient
+              .from('mythologies')
+              .select('*')
+              .eq('created_by', user.id)
+              .order('created_at', { ascending: false });
+            console.log(`✅ Refreshed - now ${mythsData?.length || 0} mythologies`);
+            setMythologies(mythsData || []);
+          }
+          // Close the modal
+          setDeleteModal({ isOpen: false, mythologyId: '', mythologyName: '' });
         }}
       />
 
