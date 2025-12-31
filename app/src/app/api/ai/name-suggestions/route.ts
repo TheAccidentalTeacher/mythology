@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ User authenticated:', user.id);
 
-    // Fetch mythology context - use minimal fields and ignore missing optional data
+    // Fetch mythology context
     const { data: mythology, error: mythError } = await supabase
       .from('mythologies')
       .select('name, genre, geography_type, setting_description, cultural_inspiration, five_themes')
@@ -52,18 +52,15 @@ export async function POST(request: NextRequest) {
       errorDetails: mythError 
     });
 
-    // If we can't find the mythology, just use generic context
-    const mythologyContext = mythology || {
-      name: 'Your Mythology',
-      genre: 'fantasy',
-      geography_type: 'islands',
-      setting_description: 'A mythological world',
-      cultural_inspiration: 'mixed',
-      five_themes: {}
-    };
+    if (mythError || !mythology) {
+      return NextResponse.json(
+        { success: false, error: 'Mythology not found' },
+        { status: 404 }
+      );
+    }
 
     // Build the prompt
-    const prompt = buildNameSuggestionPrompt(mythologyContext, category, entityType, existingName);
+    const prompt = buildNameSuggestionPrompt(mythology, category, entityType, existingName);
 
     // Make AI request using the aiClient's request method
     const result = await aiClient.request({
