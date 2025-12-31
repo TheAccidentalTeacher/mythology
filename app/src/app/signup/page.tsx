@@ -2,11 +2,11 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 
 type Role = 'teacher' | 'student';
 
-export default function SignupPage() {
+function SignupForm() {
   const searchParams = useSearchParams();
   const [role, setRole] = useState<Role | null>(null);
   const [email, setEmail] = useState('');
@@ -342,5 +342,17 @@ export default function SignupPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-linear-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   );
 }
