@@ -189,7 +189,16 @@ export default function TeacherDashboard() {
         {/* Coming Soon Message */}
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-8 mb-8">
           <h2 className="text-2xl font-bold text-white mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              href="/teacher/mythologies"
+              className="p-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-400/30 rounded-xl transition-all group"
+            >
+              <span className="text-3xl block mb-2">📚</span>
+              <h3 className="text-white font-semibold mb-1">Review Mythologies</h3>
+              <p className="text-gray-400 text-sm">Browse and grade student work</p>
+            </Link>
+
             <Link
               href="/teacher/images"
               className="p-6 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 border border-indigo-400/30 rounded-xl transition-all group"
