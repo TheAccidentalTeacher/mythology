@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import InviteStudentsModal from '@/components/InviteStudentsModal';
 
 interface Profile {
   id: string;
@@ -35,6 +36,7 @@ export default function TeacherDashboard() {
   const [classroom, setClassroom] = useState<Classroom | null>(null);
   const [stats, setStats] = useState<Stats>({ totalStudents: 0, totalMythologies: 0, pendingReviews: 0, flaggedContent: 0 });
   const [loading, setLoading] = useState(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -133,7 +135,16 @@ export default function TeacherDashboard() {
         {/* Classroom Info Card */}
         {classroom && (
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-6 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Your Classroom</h2>
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-bold text-white">Your Classroom</h2>
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg transition-all font-semibold flex items-center gap-2"
+              >
+                <span>📧</span>
+                Invite Students
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-400 text-sm">Classroom Name</p>
@@ -223,6 +234,14 @@ export default function TeacherDashboard() {
           </ul>
         </div>
       </div>
+
+      {/* Invite Modal */}
+      {showInviteModal && classroom && (
+        <InviteStudentsModal
+          inviteCode={classroom.invite_code || ''}
+          onClose={() => setShowInviteModal(false)}
+        />
+      )}
     </div>
   );
 }

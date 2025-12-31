@@ -1,12 +1,13 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 type Role = 'teacher' | 'student';
 
 export default function SignupPage() {
+  const searchParams = useSearchParams();
   const [role, setRole] = useState<Role | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +19,15 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  // Pre-fill invite code from URL
+  useEffect(() => {
+    const inviteFromUrl = searchParams.get('invite');
+    if (inviteFromUrl) {
+      setInviteCode(inviteFromUrl);
+      setRole('student'); // Auto-select student role
+    }
+  }, [searchParams]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
