@@ -589,30 +589,53 @@ export function AIInputHelper({
     setAiError(null);
     setAiSuggestions([]);
 
+    const requestBody = {
+      mythologyId,
+      category,
+      entityType,
+      existingName: value.trim() || undefined,
+    };
+
+    console.log('🎯 AI Name Suggestion Request:', {
+      url: '/api/ai/name-suggestions',
+      method: 'POST',
+      body: requestBody,
+    });
+
     try {
       const res = await fetch('/api/ai/name-suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mythologyId,
-          category,
-          entityType,
-          existingName: value.trim() || undefined, // If they have a name, refine it
-        }),
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('📡 AI Name Suggestion Response:', {
+        status: res.status,
+        statusText: res.statusText,
+        ok: res.ok,
+        url: res.url,
       });
 
       if (res.ok) {
         const data = await res.json();
+        console.log('✅ AI Name Suggestion Success:', data);
         if (data.success && data.suggestions) {
           setAiSuggestions(data.suggestions);
         } else {
+          console.error('❌ AI returned success but no suggestions:', data);
           setAiError('Could not generate suggestions. Try again!');
         }
       } else {
+        const errorText = await res.text();
+        console.error('❌ AI Name Suggestion Failed:', {
+          status: res.status,
+          statusText: res.statusText,
+          body: errorText,
+        });
         setAiError('AI is busy. Try again in a moment!');
       }
     } catch (err) {
-      console.error('AI name suggestion error:', err);
+      console.error('💥 AI name suggestion error:', err);
       setAiError('Something went wrong. Try again!');
     } finally {
       setLoadingCategory(null);
