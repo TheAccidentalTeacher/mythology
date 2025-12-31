@@ -247,49 +247,60 @@ export default function TeacherDashboard() {
           </div>
         </div>
 
-        {/* More Features Coming */}
+        {/* Revolutionary Features - NOW LIVE! */}
         <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-lg rounded-2xl border-2 border-green-400/30 p-8">
           <div className="flex items-start gap-4">
-            <div className="text-5xl">🚀</div>
+            <div className="text-5xl">✅</div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-white mb-3">
-                Revolutionary Features Coming Soon
+              <h2 className="text-2xl font-bold text-white mb-1 flex items-center gap-3">
+                Revolutionary Features NOW LIVE!
+                <span className="px-3 py-1 bg-green-500/30 text-green-300 text-sm font-bold rounded-full">NEW</span>
               </h2>
               <p className="text-gray-200 mb-4">
-                We're not just another assignment tracker. We're building something that actually makes learning FUN.
+                We're not just another assignment tracker. We've built something that actually makes learning FUN.
               </p>
               <div className="grid md:grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center gap-2 text-green-300">
-                  <span>✨</span>
-                  <span>Curiosity-driven assignments with multi-age differentiation</span>
+                  <span className="text-lg">✅</span>
+                  <span className="font-semibold">Curiosity-driven assignments with multi-age differentiation</span>
                 </div>
                 <div className="flex items-center gap-2 text-blue-300">
-                  <span>🧬</span>
-                  <span>Convert mythology → science/civics lessons</span>
+                  <span className="text-lg">✅</span>
+                  <span className="font-semibold">Convert mythology → science/civics lessons</span>
                 </div>
                 <div className="flex items-center gap-2 text-purple-300">
-                  <span>📝</span>
-                  <span>Narrative feedback system (not just arbitrary grades)</span>
+                  <span className="text-lg">✅</span>
+                  <span className="font-semibold">Narrative feedback system (not just arbitrary grades)</span>
                 </div>
                 <div className="flex items-center gap-2 text-pink-300">
-                  <span>🤖</span>
-                  <span>AI accuracy verification for science/history</span>
+                  <span className="text-lg">✅</span>
+                  <span className="font-semibold">AI accuracy verification for science/history</span>
                 </div>
                 <div className="flex items-center gap-2 text-yellow-300">
-                  <span>🗽</span>
+                  <span>🔜</span>
                   <span>Constitutional foundation & American civics integration</span>
                 </div>
                 <div className="flex items-center gap-2 text-indigo-300">
-                  <span>👨‍👩‍👧</span>
+                  <span>🔜</span>
                   <span>Parent portal with collaborative feedback</span>
                 </div>
               </div>
-              <button 
-                onClick={() => localStorage.removeItem('hasSeenTeacherOnboarding')}
-                className="mt-4 text-sm text-gray-300 hover:text-white underline"
-              >
-                See the tour again
-              </button>
+              
+              <div className="mt-6 flex items-center gap-4">
+                <Link
+                  href="/teacher/assignments"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-green-500/50 transition-all"
+                >
+                  <span>📚</span>
+                  <span>Create Your First Assignment →</span>
+                </Link>
+                <button 
+                  onClick={() => localStorage.removeItem('hasSeenTeacherOnboarding')}
+                  className="text-sm text-gray-300 hover:text-white underline"
+                >
+                  See the tour again
+                </button>
+              </div>
             </div>
           </div>
         </div>
