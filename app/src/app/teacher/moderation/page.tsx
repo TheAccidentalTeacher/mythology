@@ -99,7 +99,13 @@ export default function TeacherModerationPage() {
         .eq('moderation_status', 'flagged')
         .order('updated_at', { ascending: false });
 
-      setFlaggedMythologies(flaggedData || []);
+      // Transform the data to extract creator from array (Supabase returns foreign keys as arrays)
+      const transformedFlaggedData = flaggedData?.map(item => ({
+        ...item,
+        creator: Array.isArray(item.creator) ? item.creator[0] : item.creator
+      })) || [];
+
+      setFlaggedMythologies(transformedFlaggedData);
 
       // Fetch pending images
       const { data: imageData } = await supabase
@@ -118,7 +124,13 @@ export default function TeacherModerationPage() {
         )
         .order('created_at', { ascending: false });
 
-      setPendingImages(imageData || []);
+      // Transform the data to extract profiles from array
+      const transformedImageData = imageData?.map(item => ({
+        ...item,
+        profiles: Array.isArray(item.profiles) ? item.profiles[0] : item.profiles
+      })) || [];
+
+      setPendingImages(transformedImageData);
 
       // Calculate stats
       const today = new Date().toISOString().split('T')[0];
@@ -136,8 +148,8 @@ export default function TeacherModerationPage() {
         .gte('updated_at', today);
 
       setStats({
-        flaggedMythologies: flaggedData?.length || 0,
-        pendingImages: imageData?.length || 0,
+        flaggedMythologies: transformedFlaggedData.length,
+        pendingImages: transformedImageData.length,
         approvedToday: approvedCount || 0,
         rejectedToday: rejectedCount || 0,
       });
