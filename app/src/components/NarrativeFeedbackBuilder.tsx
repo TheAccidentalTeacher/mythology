@@ -1,20 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, X, Sparkles, ThumbsUp, TrendingUp, Target } from 'lucide-react';
-
-interface NarrativeFeedback {
-  strengths: string[];
-  growth: string[];
-  nextSteps: string[];
-  overallComment: string;
-}
+import { useRouter } from 'next/navigation';
+import { createBrowserClient } from '@supabase/ssr';
+import { Plus, X, Sparkles, ThumbsUp, TrendingUp, Target, Save, Eye } from 'lucide-react';
 
 interface Props {
-  feedback: NarrativeFeedback;
-  onChange: (feedback: NarrativeFeedback) => void;
-  onGenerateAISuggestions?: () => void;
-  generatingAI?: boolean;
+  submissionId: string;
+  assignmentId: string;
+  pointsPossible: number;
+  existingFeedback?: {
+    strengthComments: string[];
+    growthComments: string[];
+    nextSteps: string[];
+    overallComment: string;
+    pointsEarned: number;
+  };
+  gradeReleased: boolean;
 }
 
 const COMMON_STRENGTHS = [
@@ -37,252 +39,313 @@ const COMMON_GROWTH = [
 ];
 
 export default function NarrativeFeedbackBuilder({ 
-  feedback, 
-  onChange, 
-  onGenerateAISuggestions,
-  generatingAI = false 
+  submissionId,
+  assignmentId,
+  pointsPossible,
+  existingFeedback,
+  gradeReleased
 }: Props) {
-  const addStrength = (strength: string = '') => {
-    onChange({
-      ...feedback,
-      strengths: [...feedback.strengths, strength]
-    });
-  };
+  const router = useRouter();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  const [saving, setSaving] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
 
-  const updateStrength = (index: number, value: string) => {
-    const newStrengths = [...feedback.strengths];
-    newStrengths[index] = value;
-    onChange({ ...feedback, strengths: newStrengths });
-  };
+  // Initialize from existing feedback or start with one empty slot for each
+  const [strengths, setStrengths] = useState<string[]>(
+    existingFeedback?.strengthComments && existingFeedback.strengthComments.length > 0
+      ? existingFeedback.strengthComments
+      : ['']
+  );
+  const [growth, setGrowth] = useState<string[]>(
+    existingFeedback?.growthComments && existingFeedback.growthComments.length > 0
+      ? existingFeedback.growthComments
+      : ['']
+  );
+  const [nextSteps, setNextSteps] = useState<string[]>(
+    existingFeedback?.nextSteps && existingFeedback.nextSteps.length > 0
+      ? existingFeedback.nextSteps
+      : ['']
+  );
+  const [overallComment, setOverallComment] = useState(existingFeedback?.overallComment || '');
+  const [pointsEarned, setPointsEarned] = useState(existingFeedback?.pointsEarned || pointsPossible);
 
-  const removeStrength = (index: number) => {
-    onChange({
-      ...feedback,
-      strengths: feedback.strengths.filter((_, i) => i !== index)
-    });
-  };
+  async function handleSave(releaseGrade: boolean) {
+    const filteredStrengths = strengths.filter(s => s.trim());
+    
+    if (filteredStrengths.length === 0) {
+      alert('Please add at least one strength before saving.');
+      return;
+    }
 
-  const addGrowth = (growth: string = '') => {
-    onChange({
-      ...feedback,
-      growth: [...feedback.growth, growth]
-    });
-  };
+    setSaving(true);
+    try {
+      const updateData = {
+        strength_comments: filteredStrengths,
+        growth_comments: growth.filter(g => g.trim()),
+        next_steps: nextSteps.filter(n => n.trim()),
+        narrative_feedback: overallComment,
+        points_earned: pointsEarned,
+        status: releaseGrade ? 'graded' : 'reviewed',
+        grade_released: releaseGrade,
+        updated_at: new Date().toISOString()
+      };
 
-  const updateGrowth = (index: number, value: string) => {
-    const newGrowth = [...feedback.growth];
-    newGrowth[index] = value;
-    onChange({ ...feedback, growth: newGrowth });
-  };
+      const { error } = await supabase
+        .from('assignment_submissions')
+        .update(updateData)
+        .eq('id', submissionId);
 
-  const removeGrowth = (index: number) => {
-    onChange({
-      ...feedback,
-      growth: feedback.growth.filter((_, i) => i !== index)
-    });
-  };
+      if (error) throw error;
 
-  const addNextStep = (step: string = '') => {
-    onChange({
-      ...feedback,
-      nextSteps: [...feedback.nextSteps, step]
-    });
-  };
+      router.refresh();
+      alert(releaseGrade ? 'Feedback saved and grade released!' : 'Feedback saved as draft.');
+    } catch (error) {
+      console.error('Error saving feedback:', error);
+      alert('Failed to save feedback. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
-  const updateNextStep = (index: number, value: string) => {
-    const newSteps = [...feedback.nextSteps];
-    newSteps[index] = value;
-    onChange({ ...feedback, nextSteps: newSteps });
-  };
-
-  const removeNextStep = (index: number) => {
-    onChange({
-      ...feedback,
-      nextSteps: feedback.nextSteps.filter((_, i) => i !== index)
-    });
-  };
-
-  const setOverallComment = (comment: string) => {
-    onChange({ ...feedback, overallComment: comment });
-  };
+  async function handleGenerateAI() {
+    setGeneratingAI(true);
+    // TODO: Implement AI suggestions endpoint
+    alert('AI suggestions coming soon! This will analyze the student work and suggest feedback.');
+    setGeneratingAI(false);
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-slate-900">Provide Feedback</h2>
+        <button
+          onClick={handleGenerateAI}
+          disabled={generatingAI}
+          className="text-sm text-purple-600 hover:text-purple-700 flex items-center gap-1 disabled:opacity-50"
+        >
+          <Sparkles className="w-4 h-4" />
+          {generatingAI ? 'Generating...' : 'AI Suggestions'}
+        </button>
+      </div>
+
+      {/* Points */}
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Points Earned
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={pointsEarned}
+            onChange={(e) => setPointsEarned(Number(e.target.value))}
+            max={pointsPossible}
+            min={0}
+            className="w-24 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <span className="text-slate-600">/ {pointsPossible}</span>
+        </div>
+      </div>
+
       {/* Strengths */}
-      <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-lg rounded-xl border border-green-400/30 p-6">
-        <h4 className="text-xl font-semibold text-green-300 mb-3 flex items-center gap-2">
-          <ThumbsUp className="w-5 h-5" />
-          ✨ Strengths - What did they do well?
-        </h4>
-        <p className="text-gray-300 text-sm mb-4">
-          Start with positivity! Highlight what the student did well.
-        </p>
-        
-        {/* Quick-add common strengths */}
-        <div className="flex flex-wrap gap-2 mb-4">
+      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-green-800 flex items-center gap-2">
+            <ThumbsUp className="w-4 h-4" />
+            Strengths - What did they do well?
+          </h3>
+          <button
+            onClick={() => setStrengths([...strengths, ''])}
+            className="text-sm text-green-700 hover:text-green-800 flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            Add
+          </button>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-3">
           {COMMON_STRENGTHS.map(strength => (
             <button
               key={strength}
-              onClick={() => addStrength(strength)}
-              className="px-3 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-300 text-sm rounded-lg transition-colors"
+              onClick={() => setStrengths([...strengths, strength])}
+              className="px-2 py-1 text-xs bg-white border border-green-300 rounded-full hover:bg-green-100 transition-colors"
             >
               + {strength}
             </button>
           ))}
         </div>
-        
-        {/* Strength inputs */}
+
         <div className="space-y-2">
-          {feedback.strengths.map((strength, idx) => (
-            <div key={idx} className="flex gap-2">
-              <input 
+          {strengths.map((strength, index) => (
+            <div key={index} className="flex gap-2">
+              <textarea
                 value={strength}
-                onChange={(e) => updateStrength(idx, e.target.value)}
-                placeholder="e.g., Your god's powers are unique and well-explained"
-                className="flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400"
+                onChange={(e) => {
+                  const newStrengths = [...strengths];
+                  newStrengths[index] = e.target.value;
+                  setStrengths(newStrengths);
+                }}
+                className="flex-1 px-3 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                rows={2}
+                placeholder="Describe what the student did well..."
               />
-              <button 
-                onClick={() => removeStrength(idx)}
-                className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              {strengths.length > 1 && (
+                <button
+                  onClick={() => setStrengths(strengths.filter((_, i) => i !== index))}
+                  className="px-2 text-red-600 hover:bg-red-50 rounded"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           ))}
         </div>
-        
-        <button 
-          onClick={() => addStrength()}
-          className="mt-3 text-sm text-green-300 hover:text-green-200 flex items-center gap-1"
-        >
-          <Plus className="w-4 h-4" />
-          Add another strength
-        </button>
       </div>
 
-      {/* Areas for Growth */}
-      <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-lg rounded-xl border border-blue-400/30 p-6">
-        <h4 className="text-xl font-semibold text-blue-300 mb-3 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5" />
-          🌱 Areas for Growth - What could be improved?
-        </h4>
-        <p className="text-gray-300 text-sm mb-4">
-          Frame feedback positively. Focus on opportunities, not failures.
-        </p>
-        
-        {/* Quick-add common growth areas */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {COMMON_GROWTH.map(growth => (
+      {/* Growth Areas */}
+      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-blue-800 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            Growth Areas - Where can they improve?
+          </h3>
+          <button
+            onClick={() => setGrowth([...growth, ''])}
+            className="text-sm text-blue-700 hover:text-blue-800 flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            Add
+          </button>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-3">
+          {COMMON_GROWTH.map(item => (
             <button
-              key={growth}
-              onClick={() => addGrowth(growth)}
-              className="px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm rounded-lg transition-colors"
+              key={item}
+              onClick={() => setGrowth([...growth, item])}
+              className="px-2 py-1 text-xs bg-white border border-blue-300 rounded-full hover:bg-blue-100 transition-colors"
             >
-              + {growth}
+              + {item}
             </button>
           ))}
         </div>
-        
-        {/* Growth inputs */}
+
         <div className="space-y-2">
-          {feedback.growth.map((item, idx) => (
-            <div key={idx} className="flex gap-2">
-              <textarea 
+          {growth.map((item, index) => (
+            <div key={index} className="flex gap-2">
+              <textarea
                 value={item}
-                onChange={(e) => updateGrowth(idx, e.target.value)}
-                placeholder="e.g., Consider adding more detail about your god's personality and how they interact with mortals"
-                className="flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
+                onChange={(e) => {
+                  const newGrowth = [...growth];
+                  newGrowth[index] = e.target.value;
+                  setGrowth(newGrowth);
+                }}
+                className="flex-1 px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 rows={2}
+                placeholder="Suggest areas for improvement..."
               />
-              <button 
-                onClick={() => removeGrowth(idx)}
-                className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors self-start"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              {growth.length > 1 && (
+                <button
+                  onClick={() => setGrowth(growth.filter((_, i) => i !== index))}
+                  className="px-2 text-red-600 hover:bg-red-50 rounded"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           ))}
         </div>
-        
-        <button 
-          onClick={() => addGrowth()}
-          className="mt-3 text-sm text-blue-300 hover:text-blue-200 flex items-center gap-1"
-        >
-          <Plus className="w-4 h-4" />
-          Add growth area
-        </button>
       </div>
 
-      {/* Next Steps (Actionable!) */}
-      <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-lg rounded-xl border border-purple-400/30 p-6">
-        <h4 className="text-xl font-semibold text-purple-300 mb-3 flex items-center gap-2">
-          <Target className="w-5 h-5" />
-          🎯 Next Steps - What specific actions should they take?
-        </h4>
-        <p className="text-gray-300 text-sm mb-4">
-          Give concrete, actionable steps. Make it clear what to do next.
-        </p>
-        
-        {/* Next step inputs */}
+      {/* Next Steps */}
+      <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-purple-800 flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            Next Steps - What should they do next?
+          </h3>
+          <button
+            onClick={() => setNextSteps([...nextSteps, ''])}
+            className="text-sm text-purple-700 hover:text-purple-800 flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            Add
+          </button>
+        </div>
+
         <div className="space-y-2">
-          {feedback.nextSteps.map((step, idx) => (
-            <div key={idx} className="flex gap-2">
-              <input 
+          {nextSteps.map((step, index) => (
+            <div key={index} className="flex gap-2">
+              <textarea
                 value={step}
-                onChange={(e) => updateNextStep(idx, e.target.value)}
-                placeholder="e.g., Try writing one myth about your god's origin story"
-                className="flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
+                onChange={(e) => {
+                  const newSteps = [...nextSteps];
+                  newSteps[index] = e.target.value;
+                  setNextSteps(newSteps);
+                }}
+                className="flex-1 px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                rows={2}
+                placeholder="Provide actionable next steps..."
               />
-              <button 
-                onClick={() => removeNextStep(idx)}
-                className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              {nextSteps.length > 1 && (
+                <button
+                  onClick={() => setNextSteps(nextSteps.filter((_, i) => i !== index))}
+                  className="px-2 text-red-600 hover:bg-red-50 rounded"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           ))}
         </div>
-        
-        <button 
-          onClick={() => addNextStep()}
-          className="mt-3 text-sm text-purple-300 hover:text-purple-200 flex items-center gap-1"
-        >
-          <Plus className="w-4 h-4" />
-          Add next step
-        </button>
       </div>
 
       {/* Overall Comment */}
-      <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 p-6">
-        <h4 className="text-xl font-semibold text-white mb-3">💬 Overall Comment</h4>
-        <p className="text-gray-300 text-sm mb-4">
-          Your overall thoughts about this work. This is the heart of your feedback.
-        </p>
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Overall Comment (Optional)
+        </label>
         <textarea
-          value={feedback.overallComment}
+          value={overallComment}
           onChange={(e) => setOverallComment(e.target.value)}
-          placeholder="Write your overall thoughts here... Be encouraging, specific, and honest."
-          rows={6}
-          className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400 resize-none"
+          rows={4}
+          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Add any additional context or summary of feedback..."
         />
       </div>
 
-      {/* AI Assistance */}
-      {onGenerateAISuggestions && (
-        <div className="border-t border-white/20 pt-6">
-          <button 
-            onClick={onGenerateAISuggestions}
-            disabled={generatingAI}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 border border-indigo-400/30 rounded-lg text-indigo-300 transition-all disabled:opacity-50"
-          >
-            <Sparkles className="w-5 h-5" />
-            {generatingAI ? 'Generating AI suggestions...' : 'Get AI suggestions for feedback (you review before sending)'}
-          </button>
-          <p className="text-gray-400 text-sm mt-2">
-            AI will provide gentle suggestions. You review and edit before the student sees anything.
-          </p>
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+        <div className="text-sm text-slate-600">
+          {gradeReleased ? (
+            <span className="text-green-600 font-medium">Grade already released to student</span>
+          ) : (
+            <span>Save as draft or release grade to student</span>
+          )}
         </div>
-      )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => handleSave(false)}
+            disabled={saving}
+            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50 flex items-center gap-2"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Saving...' : 'Save Draft'}
+          </button>
+
+          <button
+            onClick={() => handleSave(true)}
+            disabled={saving}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            {saving ? 'Releasing...' : gradeReleased ? 'Update & Keep Released' : 'Release Grade'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
