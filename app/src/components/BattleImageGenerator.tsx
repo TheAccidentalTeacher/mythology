@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { soundManager } from '@/lib/soundManager';
 
 interface Combatant {
   id: string;
@@ -127,6 +128,9 @@ Show ${winner.name} in a heroic victory pose, bathed in golden light, ${narratio
           ...prev,
           [type]: { url: data.imageUrl, provider: data.provider }
         }));
+        
+        // Play success sound for completed image
+        soundManager.play('imageComplete', { volume: 0.5 });
         
         if (onImageGenerated) {
           onImageGenerated(data.imageUrl, type);

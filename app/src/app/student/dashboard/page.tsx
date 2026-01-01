@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Database } from '@/types/database.types';
 import StandardsBadge from '@/components/StandardsBadge';
 import DeleteMythologyModal from '@/components/DeleteMythologyModal';
+import { SoundToggle } from '@/components/SoundSettings';
 
 type Mythology = Database['public']['Tables']['mythologies']['Row'];
 
@@ -113,6 +114,7 @@ export default function StudentDashboard() {
                   <span>🔥 {profile?.current_streak} day streak</span>
                 </div>
               </div>
+              <SoundToggle />
               <button
                 onClick={handleSignOut}
                 className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition-colors"

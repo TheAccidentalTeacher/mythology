@@ -172,7 +172,6 @@ if (typeof window !== 'undefined') {
   soundManager.preload('xpGain', '/sounds/effects/xp-gain.mp3');
   
   // Feature Sounds
-  soundManager.preload('victory', '/sounds/effects/victory.mp3');
   soundManager.preload('defeat', '/sounds/effects/defeat.mp3');
   soundManager.preload('swordClash', '/sounds/effects/sword-clash.mp3');
   soundManager.preload('critical', '/sounds/effects/critical.mp3');
@@ -181,7 +180,9 @@ if (typeof window !== 'undefined') {
   soundManager.preload('stepComplete', '/sounds/effects/step-complete.mp3');
   soundManager.preload('wizardComplete', '/sounds/effects/wizard-complete.mp3');
   
-  // Ambient Sounds (loaded on demand, not preloaded)
-  // soundManager.preload('oceanAmbient', '/sounds/ambient/ocean-waves.mp3');
-  // soundManager.preload('forestAmbient', '/sounds/ambient/forest-birds.mp3');
+  // NOTE: Missing sounds - add these later:
+  // soundManager.preload('victory', '/sounds/effects/victory.mp3');
+  
+  // Ambient Sounds (load on demand when needed)
+  // soundManager.preload('mysticalAmbient', '/sounds/ambient/mystical-ambient.wav');
 }

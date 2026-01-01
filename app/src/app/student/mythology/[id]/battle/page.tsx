@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import BattleImageGenerator from '@/components/BattleImageGenerator';
+import { soundManager } from '@/lib/soundManager';
 
 interface Character {
   id: string;
@@ -414,6 +415,7 @@ export default function BattleArenaPage() {
     
     if (currentActionIndex >= combatLog.length) {
       // Battle finished - show winner announcement then narration
+      soundManager.play('defeat', { volume: 0.4 });
       const timer = setTimeout(() => {
         setShowNarration(true);
         setIsPlayingBattle(false);
@@ -424,6 +426,19 @@ export default function BattleArenaPage() {
     const timer = setTimeout(() => {
       const action = combatLog[currentActionIndex];
       setLastAction(action);
+      
+      // Play appropriate sound based on damage
+      if (action.damage > 0) {
+        // Check description for critical hit or magic
+        const desc = action.description.toLowerCase();
+        if (desc.includes('critical') || desc.includes('crit')) {
+          soundManager.play('critical', { volume: 0.5 });
+        } else if (desc.includes('magic') || desc.includes('spell') || desc.includes('cast')) {
+          soundManager.play('magicCast', { volume: 0.4 });
+        } else {
+          soundManager.play('swordClash', { volume: 0.3 });
+        }
+      }
       
       // Update HP based on who got hit
       if (action.damage > 0) {

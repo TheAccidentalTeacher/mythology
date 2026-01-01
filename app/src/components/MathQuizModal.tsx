@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import StandardsModal from './StandardsModal';
 import { getStandardsForActivity } from '@/lib/standards';
+import { soundManager } from '@/lib/soundManager';
 
 interface MathProblem {
   type: string;
@@ -130,6 +131,9 @@ export default function MathQuizModal({
         if (data.isCorrect) {
           setCorrectInSession(prev => prev + 1);
           
+          // Play success sound
+          soundManager.play('success', { volume: 0.4 });
+          
           // Trigger confetti for correct answers
           if (data.streakBonus > 1) {
             // Big celebration for streak bonus!
@@ -151,6 +155,9 @@ export default function MathQuizModal({
           if (data.tokensEarned > 0 && onTokensEarned) {
             onTokensEarned(data.tokensEarned, data.totalTokens);
           }
+        } else {
+          // Play error sound for incorrect answer
+          soundManager.play('error', { volume: 0.3 });
         }
       }
     } catch (error) {

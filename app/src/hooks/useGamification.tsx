@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { soundManager } from '@/lib/soundManager';
 
 interface PointsResult {
   success: boolean;
@@ -59,6 +60,16 @@ export function useGamification(userId: string): UseGamificationReturn {
 
       const result: PointsResult = await response.json();
       setLastResult(result);
+      
+      // Play appropriate sounds
+      if (result.earnedBadges && result.earnedBadges.length > 0) {
+        soundManager.play('badgeUnlock', { volume: 0.6 });
+      } else if (result.leveledUp) {
+        soundManager.play('levelUp', { volume: 0.6 });
+      } else if (result.pointsAwarded > 0) {
+        soundManager.play('xpGain', { volume: 0.3 });
+      }
+      
       return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
