@@ -25,6 +25,7 @@ import {
 import { useWizardProgress, type WizardStep } from '@/hooks/useWizardProgress';
 import { MYTHOLOGY_CATEGORIES, type WizardData } from '@/lib/ai/prompts';
 import { useAIAssistance } from '@/hooks/useAIAssistance';
+import { soundManager } from '@/lib/soundManager';
 
 // =====================================================
 // WEB SPEECH API TYPES FOR VOICE INPUT
@@ -1846,10 +1847,17 @@ export function MythologyWizard({ isOpen, onClose, onComplete }: MythologyWizard
 
   const handleNext = async () => {
     await saveProgress();
+    
+    // Play step completion sound
+    soundManager.play('stepComplete', { volume: 0.4 });
+    
     nextStep();
   };
 
   const handleComplete = async () => {
+    // Play wizard completion celebration
+    soundManager.play('wizardComplete', { volume: 0.6 });
+    
     const result = await completeWizard();
     if (result?.mythologyId) {
       onComplete?.(result.mythologyId);
